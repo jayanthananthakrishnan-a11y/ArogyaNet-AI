@@ -1,0 +1,28 @@
+Created At: 2026-07-08T16:46:37Z
+Completed At: 2026-07-08T16:46:37Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/extracted_content.txt`
+Total Lines: 131
+Total Bytes: 7488
+Showing lines 1 to 20
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-07-07T19:31:38Z
+2: Completed At: 2026-07-07T19:31:41Z
+3: The following changes were made by the replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+4: [diff_block_start]
+5: @@ -8,29 +8,42 @@
+6:    connectionString: process.env.DATABASE_URL,
+7:  });
+8:  
+9: -// In-memory mock data for full Logistics & Resource tracking
+10: +// Mock Facilities
+11: +let mockFacilities = [
+12: +    { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },
+13: +    { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },
+14: +    { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
+15: +];
+16: +
+17: +// Multi-Tenant Mock Logistics
+18:  let mockLogistics = {
+19: -    consumables: [
+20: -        { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

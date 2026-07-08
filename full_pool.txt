@@ -1,0 +1,46 @@
+Created At: 2026-07-08T17:24:05Z
+Completed At: 2026-07-08T17:24:06Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/full_simulated_pool.txt`
+Total Lines: 38
+Total Bytes: 2294
+Showing lines 1 to 38
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-07-08T17:20:02Z
+2: Completed At: 2026-07-08T17:20:02Z
+3: File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/pool_js_dump.txt`
+4: Total Lines: 29
+5: Total Bytes: 1645
+6: Showing lines 1 to 29
+7: The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+8: 1: Created At: 2026-07-08T17:19:15Z
+9: 2: Completed At: 2026-07-08T17:19:15Z
+10: 3: File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/db/pool.js`
+11: 4: Total Lines: 41
+12: 5: Total Bytes: 1482
+13: 6: Showing lines 1 to 20
+14: 7: The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+15: 8: 1: import { pool } from './config.js';
+16: 9: 2: 
+17: 10: 3: export const query = async (text, params) => {
+18: 11: 4:     let finalQuery = text;
+19: 12: 5: 
+20: 13: 6:     // Intercept mock-specific functions to translate to standard SQL
+21: 14: 7:     if (finalQuery.includes('dashboard_overview()')) {
+22: 15: 8:         finalQuery = 'SELECT * FROM dashboard_overview_view';
+23: 16: 9:     }
+24: 17: 10: 
+25: 18: 11:     if (finalQuery.includes('UPDATE consumables SET quantity = $1 WHERE id = $2')) {
+26: 19: 12:         finalQuery = `UPDATE logistics SET itemPayload = jsonb_set(itemPayload, '{quantity}', to_jsonb($1::int)) WHERE id = $2 AND category = 'consumables'`;
+27: 20: 13:     }
+28: 21: 14: 
+29: 22: 15:     // Demo logic: Output live DB updates to the console for the judges
+30: 23: 16:     const upperText = finalQuery.trim().toUpperCase();
+31: 24: 17:     if (upperText.startsWith('INSERT') || upperText.startsWith('UPDATE') || upperText.startsWith('DELETE')) {
+32: 25: 18:         console.log(`\n[DB UPDATE] Live Data Flow Captured:`);
+33: 26: 19:         console.log(`Query: ${finalQuery.substring(0, 100)}...`);
+34: 27: 20:     }
+35: 28: The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+36: 29: 
+37: The above content shows the entire, complete file contents of the requested file.
+38: 
+The above content shows the entire, complete file contents of the requested file.

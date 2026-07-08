@@ -1,0 +1,68 @@
+Created At: 2026-07-08T08:12:22Z
+Completed At: 2026-07-08T08:12:25Z
+The following changes were made by the multi_replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -19,9 +19,9 @@
+ let mockLogistics = {
+     'PHC-NORTH': {
+         consumables: [
+-            { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+-            { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
+-            { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' }
++            { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable', batch_number: 'B-1001', supplier: 'PharmaCorp', storage_conditions: 'Room Temp' },
++            { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected', batch_number: 'B-1002', supplier: 'MedLife', storage_conditions: 'Room Temp' },
++            { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging', batch_number: 'B-1003', supplier: 'HealthPlus', storage_conditions: 'Dry Place' }
+         ],
+         equipment: [
+             { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
+@@ -35,7 +35,7 @@
+     },
+     'CHC-CENTRAL': {
+         consumables: [
+-            { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable' }
++            { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable', batch_number: 'B-2001', supplier: 'PharmaCorp', storage_conditions: 'Room Temp' }
+         ],
+         equipment: [],
+         transport: [],
+@@ -53,6 +53,17 @@
+     { id: 5, center_id: 'CHC-CENTRAL', timestamp: new Date(Date.now() - 20000000).toISOString(), type: 'disease', item_name: 'Viral Fever Cases', quantity_used: 120 }
+ ];
+ 
++// Module 7: Mock Attendance Logs
++let mockAttendance = [
++    { id: 1, center_id: 'PHC-NORTH', doctor_name: 'Dr. Sharma', status: 'Present', duty_hours: 8, leaves: 0, overtime: 2, department: 'General', patients_treated: 45, date: new Date().toISOString() },
++    { id: 2, center_id: 'PHC-NORTH', doctor_name: 'Dr. Verma', status: 'Absent', duty_hours: 0, leaves: 1, overtime: 0, department: 'Pediatrics', patients_treated: 0, date: new Date().toISOString() }
++];
++
++// Module 4: Specific Patient Footfall Logs
++let mockFootfallLogs = [
++    { id: 1, center_id: 'CHC-CENTRAL', date: new Date().toISOString(), patient_count: 300, event_name: 'Weekly Market', expected_attendance: 5000, disease_type: 'General' }
++];
++
+ export const query = async (text, params) => {
+     if (!process.env.DATABASE_URL) {
+         // ... Mock Logic Handler ...
+@@ -105,6 +105,20 @@
+             return { rows: [newLog] };
+         } else if (text.includes('SELECT * FROM daily_logs')) {
+             return { rows: mockDailyLogs };
++        } else if (text.includes('INSERT INTO attendance')) {
++            const [center_id, doctor_name, status, duty_hours, leaves, overtime, department, patients_treated] = params;
++            const newAtt = { id: mockAttendance.length + 1, center_id, doctor_name, status, duty_hours, leaves, overtime, department, patients_treated, date: new Date().toISOString() };
++            mockAttendance.unshift(newAtt);
++            return { rows: [newAtt] };
++        } else if (text.includes('SELECT * FROM attendance')) {
++            return { rows: mockAttendance };
++        } else if (text.includes('INSERT INTO footfall_logs')) {
++            const [center_id, patient_count, event_name, expected_attendance, disease_type] = params;
++            const newFootfall = { id: mockFootfallLogs.length + 1, center_id, date: new Date().toISOString(), patient_count, event_name, expected_attendance, disease_type };
++            mockFootfallLogs.unshift(newFootfall);
++            return { rows: [newFootfall] };
++        } else if (text.includes('SELECT * FROM footfall_logs')) {
++            return { rows: mockFootfallLogs };
+         }
+         return { rows: [] };
+     }
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

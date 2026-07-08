@@ -1,0 +1,28 @@
+Created At: 2026-07-08T17:19:15Z
+Completed At: 2026-07-08T17:19:15Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/db/pool.js`
+Total Lines: 41
+Total Bytes: 1482
+Showing lines 1 to 20
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { pool } from './config.js';
+2: 
+3: export const query = async (text, params) => {
+4:     let finalQuery = text;
+5: 
+6:     // Intercept mock-specific functions to translate to standard SQL
+7:     if (finalQuery.includes('dashboard_overview()')) {
+8:         finalQuery = 'SELECT * FROM dashboard_overview_view';
+9:     }
+10: 
+11:     if (finalQuery.includes('UPDATE consumables SET quantity = $1 WHERE id = $2')) {
+12:         finalQuery = `UPDATE logistics SET itemPayload = jsonb_set(itemPayload, '{quantity}', to_jsonb($1::int)) WHERE id = $2 AND category = 'consumables'`;
+13:     }
+14: 
+15:     // Demo logic: Output live DB updates to the console for the judges
+16:     const upperText = finalQuery.trim().toUpperCase();
+17:     if (upperText.startsWith('INSERT') || upperText.startsWith('UPDATE') || upperText.startsWith('DELETE')) {
+18:         console.log(`\n[DB UPDATE] Live Data Flow Captured:`);
+19:         console.log(`Query: ${finalQuery.substring(0, 100)}...`);
+20:     }
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

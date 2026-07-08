@@ -1,0 +1,300 @@
+Created At: 2026-07-07T20:03:29Z
+Completed At: 2026-07-07T20:03:30Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/index.js`
+Total Lines: 292
+Total Bytes: 10712
+Showing lines 1 to 292
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import express from 'express';
+2: import cors from 'cors';
+3: import { VertexAI } from '@google-cloud/vertexai';
+4: import dotenv from 'dotenv';
+5: import path from 'path';
+6: import { fileURLToPath } from 'url';
+7: import { query } from './db/pool.js';
+8: 
+9: dotenv.config();
+10: 
+11: const __filename = fileURLToPath(import.meta.url);
+12: const __dirname = path.dirname(__filename);
+13: 
+14: const app = express();
+15: app.use(cors());
+16: app.use(express.json());
+17: 
+18: // --- SERVICE ACCOUNT AUTHENTICATION SETUP ---
+19: const keyPath = path.join(__dirname, 'service-account.json');
+20: process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
+21: 
+22: const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT || 'arogyanet-ai';
+23: const location = 'us-central1';
+24: 
+25: // --- SPRINT 1: INVENTORY ENDPOINTS ---
+26: app.get('/api/inventory/:center_id', async (req, res) => {
+27:   try {
+28:     const { center_id } = req.params;
+29:     const result = await query(`SELECT * FROM logistics_summary WHERE center_id = $1`, [center_id]);
+30:     res.json(result.rows[0]);
+31:   } catch (error) {
+32:     console.error(error);
+33:     res.status(500).json({ error: 'Failed to fetch inventory' });
+34:   }
+35: });
+36: 
+37: // Create Item
+38: app.post('/api/inventory/add', async (req, res) => {
+39:     const { center_id, category, itemData } = req.body;
+40:     try {
+41:         const result = await query(`INSERT INTO logistics (center_id, category, itemPayload) VALUES ($1, $2, $3) RETURNING *`, 
+42:             [center_id, category, JSON.stringify(itemData)]
+43:         );
+44:         res.json(result.rows[0]);
+45:     } catch (error) {
+46:         console.error(error);
+47:         res.status(500).json({ error: 'Failed to add item' });
+48:     }
+49: });
+50: 
+51: // Edit Item
+52: app.put('/api/inventory/edit', async (req, res) => {
+53:     const { center_id, category, id, itemData } = req.body;
+54:     try {
+55:         const result = await query(`UPDATE logistics SET itemPayload = $1 WHERE id = $2 AND category = $3 AND center_id = $4 RETURNING *`, 
+56:             [center_id, category, id, JSON.stringify(itemData)]
+57:         );
+58:         res.json(result.rows[0]);
+59:     } catch (error) {
+60:         console.error(error);
+61:         res.status(500).json({ error: 'Failed to update item' });
+62:     }
+63: });
+64: 
+65: // Delete Item
+66: app.delete('/api/inventory/delete', async (req, res) => {
+67:     const { center_id, category, id } = req.body;
+68:     try {
+69:         const result = await query(`DELETE FROM logistics WHERE id = $1 AND category = $2 AND center_id = $3 RETURNING *`, 
+70:             [center_id, category, id]
+71:         );
+72:         res.json(result.rows[0]);
+73:     } catch (error) {
+74:         console.error(error);
+75:         res.status(500).json({ error: 'Failed to delete item' });
+76:     }
+77: });
+78: 
+79: app.post('/api/inventory/redistribute', async (req, res) => {
+80:    const { id, name } = req.body;
+81:    try {
+82:        // In a real app, this would insert an entry into an 'alerts' or 'transfers' table
+83:        console.log(`[ALERT] Redistribution requested for ${name} (ID: ${id})`);
+84:        res.json({ success: true, message: "Redistribution request logged securely." });
+85:    } catch (error) {
+86:        console.error(error);
+87:        res.status(500).json({ error: 'Failed to request redistribution' });
+88:    }
+89: });
+90: 
+91: // --- SPRINT 2: DAILY LOGS & AI REPORTING ---
+92: app.post('/api/logs/add', async (req, res) => {
+93:     const { center_id, type, item_name, qty_or_notes, inventory_id } = req.body;
+94:     try {
+95:         const logResult = await query(
+96:             `INSERT INTO daily_logs (center_id, type, item_name, qty_or_notes) VALUES ($1, $2, $3, $4) RETURNING *`,
+97:             [center_id, type, item_name, qty_or_notes]
+98:         );
+99:         
+100:         if (type === 'consumption' && inventory_id) {
+101:             const currentItemResult = await query(`SELECT * FROM logistics_summary`); 
+102:             const item = currentItemResult.rows[0].consumables.find(i => i.id === inventory_id);
+103:             if (item) {
+104:                 await query(`UPDATE consumables SET quantity = $1 WHERE id = $2`, [item.quantity - qty_or_notes, inventory_id]);
+105:             }
+106:         }
+107:         
+108:         res.json(logResult.rows[0]);
+109:     } catch (error) {
+110:         console.error(error);
+111:         res.status(500).json({ error: 'Failed to add log' });
+112:     }
+113: });
+114: 
+115: app.get('/api/district/ai-report', async (req, res) => {
+116:     try {
+117:         const logsResult = await query(`SELECT * FROM daily_logs ORDER BY timestamp DESC LIMIT 50`);
+118:         const logs = logsResult.rows;
+119: 
+120:         const vertexAI = new VertexAI({ project: projectId, location: location });
+121:         const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+122: 
+123:         const prompt = `
+124:           You are an AI acting as the District Health Commander.
+125:           Analyze these recent daily operations logs from various primary health centers:
+126:           ${JSON.stringify(logs)}
+127: 
+128:           Provide a strictly JSON response analyzing the district:
+129:           {
+130:              "status": "Stable" | "Warning" | "Critical",
+131:              "summary": "A 2-sentence executive summary of the district's operational health based on the logs.",
+132:              "key_insights": [
+133:                 "insight 1 (e.g. Paracetamol usage is high at PHC-NORTH)",
+134:                 "insight 2 (e.g. ECG Machine defect reported)"
+135:              ]
+136:           }
+137:         `;
+138: 
+139:         const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+140:         const result = await generativeModel.generateContent(request);
+141:         
+142:         let text = '';
+143:         if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
+144:            text = result.response.candidates[0].content.parts[0].text;
+145:         }
+146:         
+147:         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+148:         const data = JSON.parse(cleanText);
+149: 
+150:         res.json({
+151:             ai_analysis: data,
+152:             recent_logs: logs
+153:         });
+154: 
+155:     } catch (error) {
+156:         console.error('AI Report Error:', error);
+157:         res.status(500).json({ error: 'Failed to generate AI report' });
+158:     }
+159: });
+160: 
+161: // 1. Dashboard Overview Endpoint (Fetches aggregated KPI data)
+162: app.get('/api/district/overview', async (req, res) => {
+163:   try {
+164:     const result = await query(`SELECT dashboard_overview()`);
+165:     res.json(result.rows[0]);
+166:   } catch (error) {
+167:     console.error(error);
+168:     res.status(500).json({ error: 'Failed to fetch overview' });
+169:   }
+170: });
+171: 
+172: app.get('/api/district/facilities', async (req, res) => {
+173:   try {
+174:     const result = await query(`SELECT * FROM facilities`);
+175:     res.json(result.rows);
+176:   } catch (error) {
+177:     console.error(error);
+178:     res.status(500).json({ error: 'Failed to fetch facilities' });
+179:   }
+180: });
+181: 
+182: // --- SPRINT 2: CITIZEN SEARCH ---
+183: app.get('/api/public/search', async (req, res) => {
+184:     try {
+185:         const { query: searchQuery } = req.query;
+186:         // In SQL this would be: SELECT * FROM facilities WHERE location ILIKE $1
+187:         const result = await query(`SELECT * FROM facilities`);
+188:         let facilities = result.rows;
+189:         if (searchQuery) {
+190:             facilities = facilities.filter(f => f.location.toLowerCase().includes(searchQuery.toLowerCase()));
+191:         }
+192:         res.json(facilities);
+193:     } catch (error) {
+194:         console.error(error);
+195:         res.status(500).json({ error: 'Search failed' });
+196:     }
+197: });
+198: 
+199: // --- SPRINT 2: SURVEILLANCE ---
+200: app.get('/api/district/surveillance', async (req, res) => {
+201:     try {
+202:         // Fetch all facilities and daily_logs
+203:         const facRes = await query(`SELECT * FROM facilities`);
+204:         const logRes = await query(`SELECT * FROM daily_logs`);
+205:         
+206:         const facilities = facRes.rows;
+207:         const diseaseLogs = logRes.rows.filter(log => log.type === 'disease');
+208:         
+209:         // Aggregate risk per facility
+210:         const surveillanceData = facilities.map(fac => {
+211:             const facLogs = diseaseLogs.filter(l => l.center_id === fac.id);
+212:             const totalCases = facLogs.reduce((sum, l) => sum + (parseInt(l.quantity_used) || 0), 0);
+213:             
+214:             let risk = 'Low';
+215:             let color = 'green';
+216:             if (totalCases > 100) { risk = 'High'; color = 'red'; }
+217:             else if (totalCases > 20) { risk = 'Elevated'; color = 'yellow'; }
+218:             
+219:             return {
+220:                 ...fac,
+221:                 total_disease_cases: totalCases,
+222:                 risk_tier: risk,
+223:                 color: color,
+224:                 recent_logs: facLogs.slice(0, 3) // Top 3 recent reports
+225:             };
+226:         });
+227:         
+228:         res.json(surveillanceData);
+229:     } catch (error) {
+230:         console.error(error);
+231:         res.status(500).json({ error: 'Failed to load surveillance data' });
+232:     }
+233: });
+234: 
+235: // 2. Autonomous AI Analysis Endpoint
+236: app.post('/api/analyze-center/:center_id', async (req, res) => {
+237:   const { center_id } = req.params;
+238:   
+239:   try {
+240:     // 1. Fetch live truth from Database
+241:     const inventoryResult = await query(`SELECT * FROM inventory WHERE center_id = $1`, [center_id]);
+242:     const inventoryData = inventoryResult.rows;
+243: 
+244:     const vertexAI = new VertexAI({ project: projectId, location: location });
+245:     const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+246: 
+247:     const prompt = `
+248:       You are an AI assistant for ArogyaNet, a District Health Command Center.
+249:       Analyze the following live database snapshot for a Primary Health Centre.
+250:       
+251:       Inventory Data: ${JSON.stringify(inventoryData)}
+252:       
+253:       Identify any potential shortages, expiries, or critical issues.
+254:       Provide the response strictly in the following JSON format:
+255:       {
+256:         "status": "Safe" | "Low" | "Critical",
+257:         "recommendation": "your recommendation here"
+258:       }
+259:     `;
+260: 
+261:     const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+262:     const result = await generativeModel.generateContent(request);
+263:     
+264:     let text = '';
+265:     if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
+266:        text = result.response.candidates[0].content.parts[0].text;
+267:     }
+268:     
+269:     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+270:     const data = JSON.parse(cleanText);
+271: 
+272:     // If critical, autonomously insert an Alert into the database!
+273:     if (data.status === 'Critical') {
+274:        await query(
+275:            `INSERT INTO alerts (center_id, type, priority, message, recommended_action) 
+276:             VALUES ($1, $2, $3, $4, $5)`,
+277:            [center_id, 'AI Autonomous Alert', 'HIGH', 'Critical shortage predicted.', data.recommendation]
+278:        );
+279:     }
+280: 
+281:     res.json(data);
+282:   } catch (error) {
+283:     console.error('Vertex AI Error:', error);
+284:     res.status(500).json({ error: error.message || 'Internal server error.' });
+285:   }
+286: });
+287: 
+288: const PORT = process.env.PORT || 5000;
+289: app.listen(PORT, () => {
+290:   console.log(`Backend proxy server listening on port ${PORT}`);
+291: });
+292: 
+The above content shows the entire, complete file contents of the requested file.

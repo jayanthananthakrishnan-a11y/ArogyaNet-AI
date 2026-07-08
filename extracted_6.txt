@@ -1,0 +1,40 @@
+Created At: 2026-07-08T08:55:51Z
+Completed At: 2026-07-08T08:55:53Z
+The following changes were made by the multi_replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -15,6 +15,13 @@
+     { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
+ ];
+ 
++// Mock Users
++let mockUsers = [
++    { username: 'admin', password: 'password', role: 'admin', center_id: null },
++    { username: 'phc-north', password: 'password', role: 'staff', center_id: 'PHC-NORTH' },
++    { username: 'chc-central', password: 'password', role: 'staff', center_id: 'CHC-CENTRAL' }
++];
++
+ // Multi-Tenant Mock Logistics
+ let mockLogistics = {
+     'PHC-NORTH': {
+@@ -80,6 +80,18 @@
+             };
+         } else if (text.includes('SELECT * FROM facilities')) {
+             return { rows: mockFacilities };
++        } else if (text.includes('INSERT INTO facilities')) {
++            const [id, name, type, location, total_beds, critical_alerts, footfall_avg] = params;
++            const newFac = { id, name, type, location, total_beds, critical_alerts, footfall_avg };
++            mockFacilities.push(newFac);
++            return { rows: [newFac] };
++        } else if (text.includes('SELECT * FROM users')) {
++            return { rows: mockUsers };
++        } else if (text.includes('INSERT INTO users')) {
++            const [username, password, role, center_id] = params;
++            const newUser = { username, password, role, center_id };
++            mockUsers.push(newUser);
++            return { rows: [newUser] };
+         } else if (text.includes('SELECT * FROM all_logistics')) {
+             return { rows: [mockLogistics] };
+         } else if (text.includes('SELECT') && text.includes('logistics_summary')) {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

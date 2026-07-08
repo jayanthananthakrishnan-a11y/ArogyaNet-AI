@@ -1,0 +1,119 @@
+
+// --- AI CHATBOT ---
+app.post('/api/chatbot', async (req, res) => {
+    const { query: userQuery, role, center_id, language } = req.body;
+    try {
+        const vertexAI = new VertexAI({ project: projectId, location: location });
+        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        
+        const prompt = `
+          You are the ArogyaNet District Intelligence Core, an AI assistant for a local health administration system.
+          The user is a ${role} from ${center_id || 'the district admin office'}.
+          
+          User Query: "${userQuery}"
+          
+          Provide a helpful, professional, and concise response. If they ask about specific stock or alerts, instruct them to visit the respective modules (e.g. 'District Logistics' or 'Command Center').
+          Respond strictly in the language requested by the user: ${language === 'hi' ? 'Hindi' : 'English'}. If the input is in English, provide an English response. If the input is in Hindi, provide a Hindi response.
+        `;
+        
+        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+        const result = await generativeModel.generateContent(request);
+        let text = '';
+        if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
+           text = result.response.candidates[0].content.parts[0].text;
+        }
+        res.json({ reply: text || 'I am sorry, I could not process that request.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Chatbot error' });
+    }
+});
+
+// --- AI REDISTRIBUTION ENGINE ---
+app.post('/api/district/redistribution', async (req, res) => {
+    const { language } = req.body;
+    try {
+        const facRes = await query('SELECT * FROM facilities');
+        const facilities = facRes.rows;
+        
+        const vertexAI = new VertexAI({ project: projectId, location: location });
+        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        
+        const prompt = `
+          Analyze the following district facilities:
+          ${JSON.stringify(facilities)}
+          
+          Generate a redistribution manifest recommending exactly 2 resource transfers between facilities to balance load (e.g., from a facility with few alerts/high beds to a facility with many alerts).
+          Provide the output STRICTLY as a JSON array of objects:
+          [
+            {
+              "from": "Facility Name A",
+              "to": "Facility Name B",
+              "resource": "e.g., 5 General Beds",
+              "reason": "Brief justification"
+            }
+          ]
+        `;
+        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+        const result = await generativeModel.generateContent(request);
+        let text = '';
+        if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
+           text = result.response.candidates[0].content.parts[0].text;
+        }
+        
+        const cleanText = text.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
+        const data = JSON.parse(cleanText);
+        res.json(data);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Redistribution error' });
+    }
+});
+
+// --- MLA DASHBOARD ENHANCEMENTS ---
+app.get('/api/mla/trend-analytics', async (req, res) => {
+    const { lang } = req.query;
+    try {
+        const vertexAI = new VertexAI({ project: projectId, location: location });
+        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const logsRes = await query('SELECT * FROM daily_logs');
+        
+        const prompt = `
+          Analyze the following district daily health logs and provide a 2-3 sentence trend summary (e.g. 'Dengue cases down by 15%').
+          Respond strictly in the language requested: ${lang === 'hi' ? 'Hindi' : 'English'}.
+          Data: ${JSON.stringify(logsRes.rows)}
+        `;
+        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+        const result = await generativeModel.generateContent(request);
+        res.json({ trend_summary: result.response.candidates[0].content.parts[0].text?.trim() });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Trend analytics error' });
+    }
+});
+
+app.get('/api/mla/governance-recommendations', async (req, res) => {
+    const { lang } = req.query;
+    try {
+        const vertexAI = new VertexAI({ project: projectId, location: location });
+        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const facRes = await query('SELECT * FROM facilities');
+        
+        const prompt = `
+          Act as an AI Governance Advisor. Review the following district facilities data.
+          Provide 3 bullet points with long-term policy suggestions or resource allocation recommendations (e.g., 'Need for new CHC in Zone B').
+          Respond strictly in the language requested: ${lang === 'hi' ? 'Hindi' : 'English'}.
+          Data: ${JSON.stringify(facRes.rows)}
+        `;
+        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+        const result = await generativeModel.generateContent(request);
+        
+        const text = result.response.candidates[0].content.parts[0].text || '';
+        const recs = text.split('\n').filter(line => line.trim().startsWith('-') || line.trim().startsWith('*')).map(line => line.replace(/^[-*]\s*/, '').trim());
+        
+        res.json({ recommendations: recs.length > 0 ? recs : [text] });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Governance recommendations error' });
+    }
+});

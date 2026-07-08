@@ -1,0 +1,139 @@
+Created At: 2026-07-08T16:46:44Z
+Completed At: 2026-07-08T16:46:44Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/extracted_content.txt`
+Total Lines: 131
+Total Bytes: 7488
+Showing lines 1 to 131
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-07-07T19:31:38Z
+2: Completed At: 2026-07-07T19:31:41Z
+3: The following changes were made by the replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+4: [diff_block_start]
+5: @@ -8,29 +8,42 @@
+6:    connectionString: process.env.DATABASE_URL,
+7:  });
+8:  
+9: -// In-memory mock data for full Logistics & Resource tracking
+10: +// Mock Facilities
+11: +let mockFacilities = [
+12: +    { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },
+13: +    { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },
+14: +    { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
+15: +];
+16: +
+17: +// Multi-Tenant Mock Logistics
+18:  let mockLogistics = {
+19: -    consumables: [
+20: -        { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+21: -        { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
+22: -        { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' },
+23: -        { id: 4, name: 'IV Fluids (RL)', category: 'Supply', quantity: 15, threshold: 50, expiry_date: '2025-12-01', ai_trend: 'Stable' }
+24: -    ],
+25: -    equipment: [
+26: -        { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
+27: -        { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' },
+28: -        { id: 103, name: 'Defibrillator', status: 'Functional', last_serviced_date: '2026-06-01' }
+29: -    ],
+30: -    transport: [
+31: -        { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' },
+32: -        { id: 202, name: 'Ambulance A2 (BLS)', status: 'In-Transit', fuel_level: '42%', driver_contact: '+91 8765432109' },
+33: -        { id: 203, name: 'Ambulance A3 (BLS)', status: 'Maintenance', fuel_level: '10%', driver_contact: 'N/A' }
+34: -    ],
+35: -    beds: [
+36: -        { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 },
+37: -        { id: 302, ward_type: 'ICU', total_beds: 10, occupied_beds: 10 },
+38: -        { id: 303, ward_type: 'Maternity', total_beds: 20, occupied_beds: 12 }
+39: -    ]
+40: +    'PHC-NORTH': {
+41: +        consumables: [
+42: +            { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+43: +            { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
+44: +            { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' }
+45: +        ],
+46: +        equipment: [
+47: +            { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
+48: +            { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' }
+49: +        ],
+50: +        transport: [
+51: +            { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' }
+52: +        ],
+53: +        beds: [
+54: +            { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 }
+55: +        ]
+56: +    },
+57: +    'CHC-CENTRAL': {
+58: +        consumables: [
+59: +            { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable' }
+60: +        ],
+61: +        equipment: [],
+62: +        transport: [],
+63: +        beds: [
+64: +            { id: 302, ward_type: 'ICU', total_beds: 30, occupied_beds: 28 }
+65: +        ]
+66: +    }
+67:  };
+68:  
+69:  // In-memory daily logs to simulate audit trail
+70: @@ -40,26 +40,41 @@
+71:  
+72:  export const query = async (text, params) => {
+73:      if (!process.env.DATABASE_URL) {
+74: -        console.warn("[DB Mock Mode]: DATABASE_URL is not set. Using in-memory mock state.");
+75: -        
+76: +        // ... Mock Logic Handler ...
+77:          if (text.includes('dashboard_overview')) {
+78:              return {
+79: -                rows: [{
+80: -                    total_phcs: 38,
+81: -                    live_patients: 6248,
+82: -                    stock_health: 78,
+83: -                    critical_alerts: 2
+84: -                }]
+85: -            };
+86: -        } else if (text.includes('UPDATE consumables SET quantity')) {
+87: -            const [newQty, id] = params;
+88: -            const item = mockLogistics.consumables.find(i => i.id === id);
+89: -            if (item) {
+90: -                item.quantity = newQty;
+91: -            }
+92: -            return { rows: [item] };
+93: +                rows: [{ total_phcs: mockFacilities.length, live_patients: 6248, stock_health: 78, critical_alerts: 2 }]
+94: +            };
+95: +        } else if (text.includes('SELECT * FROM facilities')) {
+96: +            return { rows: mockFacilities };
+97:          } else if (text.includes('SELECT') && text.includes('logistics_summary')) {
+98: -            return { rows: [mockLogistics] };
+99: +            const [center_id] = params;
+100: +            // Fallback to empty structure if new center
+101: +            const centerData = mockLogistics[center_id] || { consumables: [], equipment: [], transport: [], beds: [] };
+102: +            return { rows: [centerData] };
+103: +        } else if (text.includes('INSERT INTO logistics')) {
+104: +            // Very simplified generic mock for insertion
+105: +            const [center_id, category, itemPayload] = params;
+106: +            if (!mockLogistics[center_id]) mockLogistics[center_id] = { consumables: [], equipment: [], transport: [], beds: [] };
+107: +            const newItem = { id: Date.now(), ...JSON.parse(itemPayload) };
+108: +            mockLogistics[center_id][category].push(newItem);
+109: +            return { rows: [newItem] };
+110: +        } else if (text.includes('UPDATE logistics')) {
+111: +             const [center_id, category, id, itemPayload] = params;
+112: +             if (!mockLogistics[center_id]) return { rows: [] };
+113: +             let list = mockLogistics[center_id][category];
+114: +             const idx = list.findIndex(i => i.id === id);
+115: +             if (idx > -1) {
+116: +                 list[idx] = { ...list[idx], ...JSON.parse(itemPayload) };
+117: +                 return { rows: [list[idx]] };
+118: +             }
+119: +             return { rows: [] };
+120: +        } else if (text.includes('DELETE FROM logistics')) {
+121: +             const [center_id, category, id] = params;
+122: +             if (!mockLogistics[center_id]) return { rows: [] };
+123: +             let list = mockLogistics[center_id][category];
+124: +             mockLogistics[center_id][category] = list.filter(i => i.id !== id);
+125: +             return { rows: [{ id }] };
+126:          } else if (text.includes('INSERT INTO daily_logs')) {
+127:              const [center_id, type, item_name, qty_or_notes] = params;
+128:              const newLog = {
+129: [diff_block_end]
+130: 
+131: Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.
+The above content shows the entire, complete file contents of the requested file.

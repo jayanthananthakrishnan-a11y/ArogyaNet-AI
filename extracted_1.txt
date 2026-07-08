@@ -1,0 +1,131 @@
+Created At: 2026-07-07T19:31:38Z
+Completed At: 2026-07-07T19:31:41Z
+The following changes were made by the replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -8,29 +8,42 @@
+   connectionString: process.env.DATABASE_URL,
+ });
+ 
+-// In-memory mock data for full Logistics & Resource tracking
++// Mock Facilities
++let mockFacilities = [
++    { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },
++    { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },
++    { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
++];
++
++// Multi-Tenant Mock Logistics
+ let mockLogistics = {
+-    consumables: [
+-        { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+-        { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
+-        { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' },
+-        { id: 4, name: 'IV Fluids (RL)', category: 'Supply', quantity: 15, threshold: 50, expiry_date: '2025-12-01', ai_trend: 'Stable' }
+-    ],
+-    equipment: [
+-        { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
+-        { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' },
+-        { id: 103, name: 'Defibrillator', status: 'Functional', last_serviced_date: '2026-06-01' }
+-    ],
+-    transport: [
+-        { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' },
+-        { id: 202, name: 'Ambulance A2 (BLS)', status: 'In-Transit', fuel_level: '42%', driver_contact: '+91 8765432109' },
+-        { id: 203, name: 'Ambulance A3 (BLS)', status: 'Maintenance', fuel_level: '10%', driver_contact: 'N/A' }
+-    ],
+-    beds: [
+-        { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 },
+-        { id: 302, ward_type: 'ICU', total_beds: 10, occupied_beds: 10 },
+-        { id: 303, ward_type: 'Maternity', total_beds: 20, occupied_beds: 12 }
+-    ]
++    'PHC-NORTH': {
++        consumables: [
++            { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
++            { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
++            { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' }
++        ],
++        equipment: [
++            { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
++            { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' }
++        ],
++        transport: [
++            { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' }
++        ],
++        beds: [
++            { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 }
++        ]
++    },
++    'CHC-CENTRAL': {
++        consumables: [
++            { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable' }
++        ],
++        equipment: [],
++        transport: [],
++        beds: [
++            { id: 302, ward_type: 'ICU', total_beds: 30, occupied_beds: 28 }
++        ]
++    }
+ };
+ 
+ // In-memory daily logs to simulate audit trail
+@@ -40,26 +40,41 @@
+ 
+ export const query = async (text, params) => {
+     if (!process.env.DATABASE_URL) {
+-        console.warn("[DB Mock Mode]: DATABASE_URL is not set. Using in-memory mock state.");
+-        
++        // ... Mock Logic Handler ...
+         if (text.includes('dashboard_overview')) {
+             return {
+-                rows: [{
+-                    total_phcs: 38,
+-                    live_patients: 6248,
+-                    stock_health: 78,
+-                    critical_alerts: 2
+-                }]
+-            };
+-        } else if (text.includes('UPDATE consumables SET quantity')) {
+-            const [newQty, id] = params;
+-            const item = mockLogistics.consumables.find(i => i.id === id);
+-            if (item) {
+-                item.quantity = newQty;
+-            }
+-            return { rows: [item] };
++                rows: [{ total_phcs: mockFacilities.length, live_patients: 6248, stock_health: 78, critical_alerts: 2 }]
++            };
++        } else if (text.includes('SELECT * FROM facilities')) {
++            return { rows: mockFacilities };
+         } else if (text.includes('SELECT') && text.includes('logistics_summary')) {
+-            return { rows: [mockLogistics] };
++            const [center_id] = params;
++            // Fallback to empty structure if new center
++            const centerData = mockLogistics[center_id] || { consumables: [], equipment: [], transport: [], beds: [] };
++            return { rows: [centerData] };
++        } else if (text.includes('INSERT INTO logistics')) {
++            // Very simplified generic mock for insertion
++            const [center_id, category, itemPayload] = params;
++            if (!mockLogistics[center_id]) mockLogistics[center_id] = { consumables: [], equipment: [], transport: [], beds: [] };
++            const newItem = { id: Date.now(), ...JSON.parse(itemPayload) };
++            mockLogistics[center_id][category].push(newItem);
++            return { rows: [newItem] };
++        } else if (text.includes('UPDATE logistics')) {
++             const [center_id, category, id, itemPayload] = params;
++             if (!mockLogistics[center_id]) return { rows: [] };
++             let list = mockLogistics[center_id][category];
++             const idx = list.findIndex(i => i.id === id);
++             if (idx > -1) {
++                 list[idx] = { ...list[idx], ...JSON.parse(itemPayload) };
++                 return { rows: [list[idx]] };
++             }
++             return { rows: [] };
++        } else if (text.includes('DELETE FROM logistics')) {
++             const [center_id, category, id] = params;
++             if (!mockLogistics[center_id]) return { rows: [] };
++             let list = mockLogistics[center_id][category];
++             mockLogistics[center_id][category] = list.filter(i => i.id !== id);
++             return { rows: [{ id }] };
+         } else if (text.includes('INSERT INTO daily_logs')) {
+             const [center_id, type, item_name, qty_or_notes] = params;
+             const newLog = {
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

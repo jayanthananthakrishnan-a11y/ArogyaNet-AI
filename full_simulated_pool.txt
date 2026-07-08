@@ -1,0 +1,37 @@
+Created At: 2026-07-08T17:20:02Z
+Completed At: 2026-07-08T17:20:02Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/pool_js_dump.txt`
+Total Lines: 29
+Total Bytes: 1645
+Showing lines 1 to 29
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: Created At: 2026-07-08T17:19:15Z
+2: Completed At: 2026-07-08T17:19:15Z
+3: File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/db/pool.js`
+4: Total Lines: 41
+5: Total Bytes: 1482
+6: Showing lines 1 to 20
+7: The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+8: 1: import { pool } from './config.js';
+9: 2: 
+10: 3: export const query = async (text, params) => {
+11: 4:     let finalQuery = text;
+12: 5: 
+13: 6:     // Intercept mock-specific functions to translate to standard SQL
+14: 7:     if (finalQuery.includes('dashboard_overview()')) {
+15: 8:         finalQuery = 'SELECT * FROM dashboard_overview_view';
+16: 9:     }
+17: 10: 
+18: 11:     if (finalQuery.includes('UPDATE consumables SET quantity = $1 WHERE id = $2')) {
+19: 12:         finalQuery = `UPDATE logistics SET itemPayload = jsonb_set(itemPayload, '{quantity}', to_jsonb($1::int)) WHERE id = $2 AND category = 'consumables'`;
+20: 13:     }
+21: 14: 
+22: 15:     // Demo logic: Output live DB updates to the console for the judges
+23: 16:     const upperText = finalQuery.trim().toUpperCase();
+24: 17:     if (upperText.startsWith('INSERT') || upperText.startsWith('UPDATE') || upperText.startsWith('DELETE')) {
+25: 18:         console.log(`\n[DB UPDATE] Live Data Flow Captured:`);
+26: 19:         console.log(`Query: ${finalQuery.substring(0, 100)}...`);
+27: 20:     }
+28: The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
+29: 
+The above content shows the entire, complete file contents of the requested file.

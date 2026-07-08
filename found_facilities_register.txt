@@ -1,0 +1,18 @@
+[
+  {
+    "name": "write_to_file",
+    "args": {
+      "ArtifactMetadata": {
+        "RequestFeedback": true,
+        "Summary": "Implementation Plan for Phase 1 of Major Functional Upgrade",
+        "UserFacing": true
+      },
+      "CodeContent": "# Implementation Plan: Phase 1 (Facility Drill-Down & Admin Control)\n\nAs requested, we are breaking down the massive operational upgrade into phases, focusing strictly on **Phase 1** first. This phase ensures the District Admin has full control over facility registration, user access management, and deep drill-down visibility.\n\n## Proposed Changes\n\n### 1. Database & Backend Updates (`pool.js` & `server/index.js`)\n- **[NEW] `mockUsers`**: Add a new table in `pool.js` to store login credentials (username, password, role, center_id) for PHC/CHC staff.\n- **[MODIFY] `mockFacilities`**: Update insertion logic so new facilities can be dynamically added with all required fields (Location, Beds, Ambulances, Sanctioned Strength).\n- **[NEW] APIs**: \n  - `POST /api/login` to authenticate users against `mockUsers`.\n  - `POST /api/facilities/register` to add a new PHC/CHC and its baseline logistics.\n  - `POST /api/users/register` to create login credentials for staff.\n\n### 2. Admin Registry & User Management (`AdminRegistryPage.jsx`)\n- **[NEW] Component**: Create `src/components/AdminRegistryPage.jsx`.\n- **Functionality**: A new dashboard tab exclusive to the District Admin containing two forms:\n  1. **Register New Facility**: Inputs for ID, Name, Type (PHC/CHC), Location, Bed Count, Ambulance Strength, and Sanctioned Staff limits.\n  2. **Create User Credentials**: Inputs for Username, Password, and Center assignment. \n\n### 3. Authentication Overhaul (`LoginPage.jsx` & `AuthContext.jsx`)\n- **[MODIFY]**: Replace the hardcoded \"Login as Admin/Staff\" buttons in `LoginPage.jsx` with a real username and password form.\n- **[MODIFY]**: Update `AuthContext.jsx` to validate credentials via the new `POST /api/login` endpoint.\n\n### 4. Facility Drill-Down Enhancement (`FacilityDetailView.jsx` & `InventoryPage.jsx`)\n- **[MODIFY] `FacilityDetailView.jsx`**: Expand this view to explicitly include **Equipment Status** (Module 8 prep) alongside the existing logs, inventory, and footfall.\n- **[MODIFY] `InventoryPage.jsx`**: Add a direct \"Deep Dive\" button or clickable links on the District Logistics page so the Admin can seamlessly navigate into a facility's `FacilityDetailView` directly from the logistics grid.\n\n## User Review Required\n> [!IMPORTANT]\n> - Since we are building a prototype, the `mockUsers` and `mockFacilities` tables will be stored in-memory in `pool.js`. Restarting the backend will reset the new facilities and credentials you create.\n> - **Default Admin Login**: I will hardcode an `admin` user (username: `admin`, password: `password`) so you don't get locked out.\n> \n> Does this architecture fulfill the requirements for Phase 1? If yes, please approve and I will begin execution immediately!",
+      "Description": "Implementation Plan for Phase 1",
+      "Overwrite": true,
+      "TargetFile": "C:\\Users\\nithya\\.gemini\\antigravity-ide\\brain\\eb26c368-36bb-469f-b94d-e3c4a46636b4\\implementation_plan.md",
+      "toolAction": "Writing implementation plan",
+      "toolSummary": "Plan Phase 1"
+    }
+  }
+]

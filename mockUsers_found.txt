@@ -1,0 +1,28 @@
+[
+  {
+    "name": "multi_replace_file_content",
+    "args": {
+      "Description": "Add mockUsers and support for users and facilities inserts in pool.js",
+      "Instruction": "Update pool.js for mockUsers and insertion",
+      "ReplacementChunks": [
+        {
+          "AllowMultiple": false,
+          "EndLine": 17,
+          "ReplacementContent": "// Mock Facilities\nlet mockFacilities = [\n    { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },\n    { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },\n    { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }\n];\n\n// Mock Users\nlet mockUsers = [\n    { username: 'admin', password: 'password', role: 'admin', center_id: null },\n    { username: 'phc-north', password: 'password', role: 'staff', center_id: 'PHC-NORTH' },\n    { username: 'chc-central', password: 'password', role: 'staff', center_id: 'CHC-CENTRAL' }\n];",
+          "StartLine": 11,
+          "TargetContent": "// Mock Facilities\nlet mockFacilities = [\n    { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },\n    { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },\n    { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }\n];"
+        },
+        {
+          "AllowMultiple": false,
+          "EndLine": 85,
+          "ReplacementContent": "        } else if (text.includes('SELECT * FROM facilities')) {\n            return { rows: mockFacilities };\n        } else if (text.includes('INSERT INTO facilities')) {\n            const [id, name, type, location, total_beds, critical_alerts, footfall_avg] = params;\n            const newFac = { id, name, type, location, total_beds, critical_alerts, footfall_avg };\n            mockFacilities.push(newFac);\n            return { rows: [newFac] };\n        } else if (text.includes('SELECT * FROM users')) {\n            return { rows: mockUsers };\n        } else if (text.includes('INSERT INTO users')) {\n            const [username, password, role, center_id] = params;\n            const newUser = { username, password, role, center_id };\n            mockUsers.push(newUser);\n            return { rows: [newUser] };\n        } else if (text.includes('SELECT * FROM all_logistics')) {",
+          "StartLine": 82,
+          "TargetContent": "        } else if (text.includes('SELECT * FROM facilities')) {\n            return { rows: mockFacilities };\n        } else if (text.includes('SELECT * FROM all_logistics')) {"
+        }
+      ],
+      "TargetFile": "c:\\Users\\nithya\\OneDrive\\Desktop\\Parliament_Hack2Skill\\server\\db\\pool.js",
+      "toolAction": "Updating mock database",
+      "toolSummary": "Update pool.js"
+    }
+  }
+]

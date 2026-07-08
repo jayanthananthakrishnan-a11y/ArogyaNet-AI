@@ -1,0 +1,126 @@
+Created At: 2026-07-07T20:22:38Z
+Completed At: 2026-07-07T20:22:38Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/db/pool.js`
+Total Lines: 118
+Total Bytes: 6141
+Showing lines 1 to 118
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import pg from 'pg';
+2: import dotenv from 'dotenv';
+3: dotenv.config();
+4: 
+5: const { Pool } = pg;
+6: 
+7: const pool = new Pool({
+8:   connectionString: process.env.DATABASE_URL,
+9: });
+10: 
+11: // Mock Facilities
+12: let mockFacilities = [
+13:     { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },
+14:     { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },
+15:     { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
+16: ];
+17: 
+18: // Multi-Tenant Mock Logistics
+19: let mockLogistics = {
+20:     'PHC-NORTH': {
+21:         consumables: [
+22:             { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
+23:             { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
+24:             { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' }
+25:         ],
+26:         equipment: [
+27:             { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
+28:             { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' }
+29:         ],
+30:         transport: [
+31:             { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' }
+32:         ],
+33:         beds: [
+34:             { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 }
+35:         ]
+36:     },
+37:     'CHC-CENTRAL': {
+38:         consumables: [
+39:             { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable' }
+40:         ],
+41:         equipment: [],
+42:         transport: [],
+43:         beds: [
+44:             { id: 302, ward_type: 'ICU', total_beds: 30, occupied_beds: 28 }
+45:         ]
+46:     }
+47: };
+48: 
+49: // In-memory daily logs to simulate audit trail
+50: let mockDailyLogs = [
+51:     { id: 1, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'consumption', item_name: 'Paracetamol 500mg', quantity_used: 50 },
+52:     { id: 2, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 40000000).toISOString(), type: 'defect', item_name: 'ECG Machine', notes: 'Screen flickers when powered on.' },
+53:     { id: 3, center_id: 'PHC-EAST', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'disease', item_name: 'Dengue Cases', quantity_used: 45 },
+54:     { id: 4, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 50000000).toISOString(), type: 'disease', item_name: 'Malaria Cases', quantity_used: 5 },
+55:     { id: 5, center_id: 'CHC-CENTRAL', timestamp: new Date(Date.now() - 20000000).toISOString(), type: 'disease', item_name: 'Viral Fever Cases', quantity_used: 120 }
+56: ];
+57: 
+58: export const query = async (text, params) => {
+59:     if (!process.env.DATABASE_URL) {
+60:         // ... Mock Logic Handler ...
+61:         if (text.includes('dashboard_overview')) {
+62:             return {
+63:                 rows: [{ total_phcs: mockFacilities.length, live_patients: 6248, stock_health: 78, critical_alerts: 2 }]
+64:             };
+65:         } else if (text.includes('SELECT * FROM facilities')) {
+66:             return { rows: mockFacilities };
+67:         } else if (text.includes('SELECT * FROM all_logistics')) {
+68:             return { rows: [mockLogistics] };
+69:         } else if (text.includes('SELECT') && text.includes('logistics_summary')) {
+70:             const [center_id] = params;
+71:             // Fallback to empty structure if new center
+72:             const centerData = mockLogistics[center_id] || { consumables: [], equipment: [], transport: [], beds: [] };
+73:             return { rows: [centerData] };
+74:         } else if (text.includes('INSERT INTO logistics')) {
+75:             // Very simplified generic mock for insertion
+76:             const [center_id, category, itemPayload] = params;
+77:             if (!mockLogistics[center_id]) mockLogistics[center_id] = { consumables: [], equipment: [], transport: [], beds: [] };
+78:             const newItem = { id: Date.now(), ...JSON.parse(itemPayload) };
+79:             mockLogistics[center_id][category].push(newItem);
+80:             return { rows: [newItem] };
+81:         } else if (text.includes('UPDATE logistics')) {
+82:              const [center_id, category, id, itemPayload] = params;
+83:              if (!mockLogistics[center_id]) return { rows: [] };
+84:              let list = mockLogistics[center_id][category];
+85:              const idx = list.findIndex(i => i.id === id);
+86:              if (idx > -1) {
+87:                  list[idx] = { ...list[idx], ...JSON.parse(itemPayload) };
+88:                  return { rows: [list[idx]] };
+89:              }
+90:              return { rows: [] };
+91:         } else if (text.includes('DELETE FROM logistics')) {
+92:              const [center_id, category, id] = params;
+93:              if (!mockLogistics[center_id]) return { rows: [] };
+94:              let list = mockLogistics[center_id][category];
+95:              mockLogistics[center_id][category] = list.filter(i => i.id !== id);
+96:              return { rows: [{ id }] };
+97:         } else if (text.includes('INSERT INTO daily_logs')) {
+98:             const [center_id, type, item_name, qty_or_notes] = params;
+99:             const newLog = {
+100:                 id: mockDailyLogs.length + 1,
+101:                 center_id,
+102:                 timestamp: new Date().toISOString(),
+103:                 type,
+104:                 item_name,
+105:                 ...(type === 'consumption' ? { quantity_used: qty_or_notes } : { notes: qty_or_notes })
+106:             };
+107:             mockDailyLogs.unshift(newLog); // push to top
+108:             return { rows: [newLog] };
+109:         } else if (text.includes('SELECT * FROM daily_logs')) {
+110:             return { rows: mockDailyLogs };
+111:         }
+112:         return { rows: [] };
+113:     }
+114:     return pool.query(text, params);
+115: };
+116: 
+117: export default pool;
+118: 
+The above content shows the entire, complete file contents of the requested file.

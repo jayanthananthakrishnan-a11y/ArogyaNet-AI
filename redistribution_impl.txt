@@ -1,0 +1,13 @@
+[
+  {
+    "name": "write_to_file",
+    "args": {
+      "CodeContent": "const fs = require('fs');\nconst transcriptPath = 'C:\\\\Users\\\\nithya\\\\.gemini\\\\antigravity-ide\\\\brain\\\\eb26c368-36bb-469f-b94d-e3c4a46636b4\\\\.system_generated\\\\logs\\\\transcript_full.jsonl';\nconst lines = fs.readFileSync(transcriptPath, 'utf8').split('\\n');\n\nfor (let i = lines.length - 1; i >= 0; i--) {\n    const line = lines[i];\n    if (line.includes('/api/chatbot') && line.includes('server/index.js') && !line.includes('find_chatbot.cjs')) {\n        try {\n            const obj = JSON.parse(line);\n            if (obj.tool_calls) {\n                fs.writeFileSync('chatbot_impl.txt', JSON.stringify(obj.tool_calls, null, 2));\n                console.log('Found chatbot code');\n                break;\n            }\n        } catch(e) {}\n    }\n}\n\nfor (let i = lines.length - 1; i >= 0; i--) {\n    const line = lines[i];\n    if (line.includes('/api/district/redistribution') && line.includes('server/index.js')) {\n        try {\n            const obj = JSON.parse(line);\n            if (obj.tool_calls) {\n                fs.writeFileSync('redistribution_impl.txt', JSON.stringify(obj.tool_calls, null, 2));\n                console.log('Found redistribution code');\n                break;\n            }\n        } catch(e) {}\n    }\n}\n",
+      "Description": "Find missing AI endpoints",
+      "Overwrite": true,
+      "TargetFile": "c:\\Users\\nithya\\OneDrive\\Desktop\\Parliament_Hack2Skill\\find_ai.cjs",
+      "toolAction": "Find AI endpoints",
+      "toolSummary": "Find AI Endpoints"
+    }
+  }
+]

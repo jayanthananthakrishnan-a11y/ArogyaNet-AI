@@ -1,0 +1,761 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD)
+
+Project Name:
+ArogyaNet AI
+
+Tagline:
+Predict. Prevent. Redistribute. Respond.
+
+Version:
+1.0
+
+Hackathon Theme:
+Track 3 - Smart Health
+AI-Driven Health Center & Supply Chain Management
+
+======================================================================
+1. PROBLEM STATEMENT
+======================================================================
+
+Primary Health Centres (PHCs) and Community Health Centres (CHCs) form the backbone of India's public healthcare system. However, most centres still operate using fragmented and largely manual processes for inventory management, attendance tracking, patient management, resource allocation and reporting.
+
+This results in several recurring operational challenges:
+
+• Medicine stock-outs due to delayed reporting
+• Expired medicines leading to wastage
+• Lack of visibility across neighbouring PHCs and CHCs
+• Uneven patient distribution causing overloaded facilities
+• Unavailable beds despite spare capacity nearby
+• Doctor absenteeism
+• Equipment failures remaining unnoticed
+• Delayed response during emergencies
+• No prediction of future demand
+• Poor coordination between health centres and district administration
+• No intelligent redistribution of available resources
+• Lack of centralized decision making
+
+Healthcare administrators are forced to react after problems occur rather than preventing them.
+
+The objective of this project is to transform district healthcare management from reactive to proactive using Artificial Intelligence.
+
+======================================================================
+2. HACKATHON REQUIREMENTS
+======================================================================
+
+The solution must demonstrate:
+
+• Working end-to-end prototype
+• Real AI-powered decision making
+• Google Cloud integration
+• Deployable application
+• Public GitHub repository
+• 3-5 minute working demo
+• Deployment link
+• Scalability beyond pilot deployment
+
+Our solution must therefore demonstrate a complete workflow rather than isolated features.
+
+======================================================================
+3. PRODUCT VISION
+======================================================================
+
+ArogyaNet AI is an AI-powered District Health Intelligence and Operations Platform that connects every PHC, CHC, district hospital, ambulance, administrator and emergency authority into one intelligent ecosystem.
+
+Instead of merely displaying healthcare data, the platform continuously analyzes operational data, predicts future demand, recommends actions, coordinates multiple departments and generates real-time alerts.
+
+The platform should become the AI Operating System for an entire district's public healthcare infrastructure.
+
+======================================================================
+4. PROJECT OBJECTIVES
+======================================================================
+
+The platform aims to:
+
+• Prevent medicine shortages before they occur.
+• Predict patient footfall.
+• Predict medicine demand.
+• Optimize medicine redistribution.
+• Reduce medicine wastage.
+• Monitor healthcare infrastructure.
+• Detect operational anomalies.
+• Improve emergency preparedness.
+• Improve district-level decision making.
+• Enable data-driven healthcare governance.
+• Improve patient outcomes.
+• Reduce manual reporting workload.
+
+======================================================================
+5. TARGET USERS
+======================================================================
+
+1. PHC Staff
+
+Responsible for:
+
+• Updating inventory
+• Recording patient visits
+• Recording medicine usage
+• Updating bed availability
+• Updating doctor attendance
+
+----------------------------------------------------------
+
+2. CHC Staff
+
+Same responsibilities as PHCs with additional referral management.
+
+----------------------------------------------------------
+
+3. District Health Officer
+
+Can monitor:
+
+• All PHCs
+• All CHCs
+• Medicine status
+• Patient load
+• Staff availability
+• Alerts
+
+----------------------------------------------------------
+
+4. District Collector / IAS
+
+Receives:
+
+• District summary
+• Emergency alerts
+• Disease outbreaks
+• Resource shortages
+
+----------------------------------------------------------
+
+5. MLA / MP
+
+Receives:
+
+• District health indicators
+• High-level operational reports
+• Major shortages
+• Critical alerts
+
+----------------------------------------------------------
+
+6. Ambulance Operators
+
+Can:
+
+• Update ambulance status
+• Receive dispatch requests
+• Report maintenance issues
+
+----------------------------------------------------------
+
+7. Disaster Management Authority
+
+Receives:
+
+• Disaster readiness alerts
+• Heatwave preparation
+• Flood preparation
+• Disease outbreak notifications
+
+======================================================================
+6. PRODUCT OVERVIEW
+======================================================================
+
+The platform consists of one centralized AI Command Center connected to every PHC and CHC.
+
+Each healthcare centre continuously updates:
+
+• Medicine inventory
+• Bed occupancy
+• Doctor attendance
+• Equipment status
+• Patient count
+• Diagnostic availability
+• Ambulance availability
+
+The AI continuously analyzes incoming data.
+
+Whenever abnormal situations are detected, the system generates recommendations and alerts appropriate stakeholders.
+
+======================================================================
+7. CORE MODULES
+======================================================================
+
+MODULE 1
+LIVE HEALTH CENTRE MONITORING
+
+Every PHC continuously reports:
+
+• Current medicine inventory
+• Number of patients
+• Available beds
+• Available doctors
+• Available nurses
+• Test availability
+• Equipment availability
+• Ambulance availability
+
+The dashboard always displays live operational status.
+
+==================================================
+
+MODULE 2
+SMART INVENTORY MANAGEMENT
+
+Track every medicine.
+
+For every medicine maintain:
+
+Medicine Name
+
+Batch Number
+
+Quantity
+
+Expiry Date
+
+Daily Consumption
+
+Weekly Consumption
+
+Monthly Consumption
+
+Minimum Threshold
+
+Supplier
+
+Storage Conditions
+
+AI continuously predicts:
+
+Days remaining before stock-out.
+
+Recommended purchase quantity.
+
+Nearby surplus inventory.
+
+Expiry risks.
+
+==================================================================
+
+MODULE 3
+AI DEMAND FORECASTING
+
+This is the heart of the platform.
+
+The AI predicts future healthcare demand using:
+
+Historical patient data
+
+Historical medicine usage
+
+Weather forecasts
+
+Festival calendar
+
+Political rallies
+
+School reopening
+
+Season
+
+Disease trends
+
+Population
+
+The output includes:
+
+Expected patients tomorrow
+
+Expected medicine usage
+
+Expected bed occupancy
+
+Expected emergency load
+
+==================================================================
+
+MODULE 4
+PATIENT FOOTFALL PREDICTION
+
+Example:
+
+Current average:
+
+180 patients/day
+
+Upcoming festival:
+
+Expected attendance:
+150,000
+
+AI predicts:
+
+Increase to 390 patients/day.
+
+Recommendations:
+
+Deploy more doctors.
+
+Increase emergency medicines.
+
+Increase ambulances.
+
+Increase ORS stock.
+
+==================================================================
+
+MODULE 5
+SMART RESOURCE REDISTRIBUTION
+
+Instead of immediately purchasing new medicines, the AI first checks nearby PHCs.
+
+Example:
+
+PHC A
+
+Paracetamol
+
+20 tablets
+
+PHC B
+
+Paracetamol
+
+900 tablets
+
+Recommendation:
+
+Transfer 300 tablets.
+
+Estimated travel time.
+
+Estimated savings.
+
+Stock-out prevented.
+
+The same redistribution logic applies to:
+
+Beds
+
+Equipment
+
+Doctors
+
+Nurses
+
+Ambulances
+
+==================================================================
+
+MODULE 6
+BED MANAGEMENT
+
+Every facility reports:
+
+Total Beds
+
+Occupied Beds
+
+ICU Beds
+
+Isolation Beds
+
+Emergency Beds
+
+AI identifies:
+
+Overloaded hospitals.
+
+Under-utilized hospitals.
+
+Patient referral opportunities.
+
+==================================================================
+
+MODULE 7
+DOCTOR ATTENDANCE
+
+Track:
+
+Attendance
+
+Duty hours
+
+Leaves
+
+Overtime
+
+Department
+
+Patient count
+
+AI identifies:
+
+Doctor shortages.
+
+Repeated absenteeism.
+
+Uneven doctor allocation.
+
+Recommendations include temporary transfers between nearby facilities.
+
+==================================================================
+
+MODULE 8
+TEST AVAILABILITY
+
+Track:
+
+Blood Tests
+
+ECG
+
+X-Ray
+
+Ultrasound
+
+CT
+
+MRI
+
+Dialysis
+
+Whenever a machine becomes unavailable:
+
+AI finds nearest alternative facility.
+
+Automatically generates referral recommendation.
+
+==================================================================
+
+MODULE 9
+AMBULANCE MANAGEMENT
+
+Every ambulance reports:
+
+GPS
+
+Availability
+
+Fuel
+
+Equipment
+
+Driver
+
+Maintenance Status
+
+AI dispatches the nearest suitable ambulance instead of merely the geographically closest one.
+
+==================================================================
+
+MODULE 10
+EVENT INTELLIGENCE
+
+The platform continuously monitors upcoming events.
+
+Examples:
+
+Religious festivals
+
+Political rallies
+
+Sports events
+
+Large gatherings
+
+Using historical healthcare demand, AI predicts additional requirements.
+
+Recommendations include:
+
+More ambulances
+
+Temporary health camps
+
+Additional trauma kits
+
+Additional emergency medicines
+
+Additional staff
+
+==================================================================
+
+MODULE 11
+WEATHER INTELLIGENCE
+
+Weather directly affects healthcare demand.
+
+Heatwave
+
+Increase:
+
+ORS
+
+IV Fluids
+
+Cooling Beds
+
+Heatstroke Medicines
+
+Monsoon
+
+Increase:
+
+Anti-malarials
+
+Dengue Kits
+
+Snake Bite Medicines
+
+Flood Relief Supplies
+
+Winter
+
+Increase:
+
+Respiratory Medicines
+
+Nebulizers
+
+Oxygen
+
+==================================================================
+
+MODULE 12
+DISEASE SURVEILLANCE
+
+Continuously monitor:
+
+Fever
+
+Malaria
+
+Dengue
+
+Diarrhea
+
+Typhoid
+
+Respiratory Diseases
+
+If abnormal clusters appear geographically:
+
+Generate outbreak alert.
+
+Notify district administration.
+
+Notify rapid response teams.
+
+Recommend preventive action.
+
+==================================================================
+
+MODULE 13
+FRAUD & ANOMALY DETECTION
+
+AI continuously checks for unusual patterns.
+
+Examples:
+
+Doctor marked present.
+
+No patients treated.
+
+Medicine consumption unusually high.
+
+Inventory frequently corrected.
+
+Duplicate patient records.
+
+Abnormal procurement.
+
+Suspicious attendance.
+
+Instead of making accusations, AI assigns a Fraud Risk Score requiring administrative review.
+
+==================================================================
+
+MODULE 14
+EXPIRY MANAGEMENT
+
+AI predicts medicine expiry.
+
+Recommendations:
+
+Transfer medicines to higher-demand centres before expiry.
+
+Reduce wastage.
+
+Reduce procurement costs.
+
+==================================================================
+
+MODULE 15
+MULTI-AGENCY COMMAND CENTER
+
+Connect:
+
+Health Department
+
+District Collector
+
+Police
+
+Disaster Management
+
+Water Department
+
+Ambulance Services
+
+Emergency Response Teams
+
+Every major alert is automatically routed to the correct authority.
+
+======================================================================
+8. AI FEATURES
+======================================================================
+
+The AI engine performs:
+
+Demand Forecasting
+
+Inventory Prediction
+
+Medicine Optimization
+
+Resource Redistribution
+
+Disease Prediction
+
+Anomaly Detection
+
+Equipment Failure Prediction
+
+Natural Language Report Generation
+
+District Health Summarization
+
+Priority Ranking
+
+Smart Recommendations
+
+======================================================================
+9. ALERT ENGINE
+======================================================================
+
+Examples:
+
+Medicine Stock Critical
+
+Doctor Shortage
+
+Equipment Failure
+
+Disease Cluster
+
+Heatwave Warning
+
+Flood Warning
+
+Festival Preparation
+
+Bed Shortage
+
+Ambulance Unavailable
+
+Inventory Expiry
+
+High Fraud Risk
+
+Every alert has:
+
+Priority
+
+Timestamp
+
+Affected Centre
+
+Recommended Action
+
+Responsible Officer
+
+======================================================================
+10. GOOGLE CLOUD
+======================================================================
+
+The solution will utilize Google Cloud services such as:
+
+• Vertex AI / Gemini for AI reasoning and report generation
+• Firebase Authentication for secure user login
+• Firestore or Cloud SQL for operational data storage
+• Cloud Storage for reports and uploaded documents/images
+• Cloud Functions or Cloud Run for backend processing
+• Google Maps APIs for geospatial visualization and routing
+• Cloud Monitoring and Logging for application health
+
+======================================================================
+11. MVP
+======================================================================
+
+The hackathon MVP will implement:
+
+✓ Live PHC Dashboard
+
+✓ Inventory Management
+
+✓ AI Stock Prediction
+
+✓ Patient Footfall Prediction
+
+✓ Weather/Event-aware Demand Forecasting
+
+✓ Resource Redistribution Recommendations
+
+✓ Bed Availability Tracking
+
+✓ Doctor Attendance Monitoring
+
+✓ Ambulance Status
+
+✓ Disease Alerts
+
+✓ District Command Dashboard
+
+✓ AI Alert Engine
+
+======================================================================
+12. FUTURE ROADMAP
+======================================================================
+
+Future enhancements include:
+
+• IoT integration with medical equipment
+• Drone-based medicine delivery
+• Telemedicine integration
+• Blockchain medicine traceability
+• National health record integration
+• Wearable device support
+• Predictive district budgeting
+• Digital Twin simulation of district healthcare infrastructure
+• Citizen-facing multilingual health advisory application
+• Public-private hospital collaboration with live bed sharing
+
+======================================================================
+13. SUCCESS CRITERIA
+======================================================================
+
+The project is successful if it demonstrates an end-to-end workflow where:
+
+1. PHCs/CHCs continuously submit operational data.
+2. AI analyzes the incoming data in real time.
+3. AI predicts shortages, demand, and operational risks.
+4. The system generates intelligent recommendations.
+5. Officials receive actionable alerts.
+6. The district dashboard updates dynamically.
+7. Healthcare resources can be proactively redistributed before shortages occur.
+
+The ultimate vision is to transform district healthcare from a reactive system into an intelligent, predictive, AI-powered public health operations platform capable of improving efficiency, reducing wastage, preventing shortages, and enabling faster, data-driven decisions across the entire healthcare ecosystem.

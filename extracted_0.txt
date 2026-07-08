@@ -1,0 +1,65 @@
+Created At: 2026-07-07T18:31:09Z
+Completed At: 2026-07-07T18:31:37Z
+The following changes were made by the replace_file_content tool to: c:\Users\nithya\OneDrive\Desktop\Parliament_Hack2Skill\server\db\pool.js. If relevant, proactively run terminal commands to execute this code for the USER. Don't ask for permission.
+[diff_block_start]
+@@ -8,13 +8,30 @@
+   connectionString: process.env.DATABASE_URL,
+ });
+ 
+-// In-memory mock data to allow true read/write simulation during hackathon
+-let mockInventory = [
+-    { id: 1, name: 'Paracetamol 500mg', quantity: 400, threshold: 500, expiry_date: '2027-01-01', center_id: 'PHC-NORTH' },
+-    { id: 2, name: 'Amoxicillin 250mg', quantity: 20, threshold: 100, expiry_date: '2026-10-01', center_id: 'PHC-NORTH' },
+-    { id: 3, name: 'ORS Packets', quantity: 1500, threshold: 1000, expiry_date: '2028-05-12', center_id: 'PHC-NORTH' },
+-    { id: 4, name: 'Oxygen Cylinders', quantity: 5, threshold: 10, expiry_date: '2030-01-01', center_id: 'PHC-NORTH' }
+-];
++// In-memory mock data for full Logistics & Resource tracking
++let mockLogistics = {
++    consumables: [
++        { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable' },
++        { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected' },
++        { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging' },
++        { id: 4, name: 'IV Fluids (RL)', category: 'Supply', quantity: 15, threshold: 50, expiry_date: '2025-12-01', ai_trend: 'Stable' }
++    ],
++    equipment: [
++        { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10' },
++        { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20' },
++        { id: 103, name: 'Defibrillator', status: 'Functional', last_serviced_date: '2026-06-01' }
++    ],
++    transport: [
++        { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' },
++        { id: 202, name: 'Ambulance A2 (BLS)', status: 'In-Transit', fuel_level: '42%', driver_contact: '+91 8765432109' },
++        { id: 203, name: 'Ambulance A3 (BLS)', status: 'Maintenance', fuel_level: '10%', driver_contact: 'N/A' }
++    ],
++    beds: [
++        { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 },
++        { id: 302, ward_type: 'ICU', total_beds: 10, occupied_beds: 10 },
++        { id: 303, ward_type: 'Maternity', total_beds: 20, occupied_beds: 12 }
++    ]
++};
+ 
+ export const query = async (text, params) => {
+     if (!process.env.DATABASE_URL) {
+@@ -28,9 +28,9 @@
+                     critical_alerts: 2
+                 }]
+             };
+-        } else if (text.includes('UPDATE inventory SET quantity')) {
++        } else if (text.includes('UPDATE consumables SET quantity')) {
+             const [newQty, id] = params;
+-            const item = mockInventory.find(i => i.id === id);
++            const item = mockLogistics.consumables.find(i => i.id === id);
+             if (item) {
+                 item.quantity = newQty;
+             }
+@@ -37,5 +37,5 @@
+-        } else if (text.includes('SELECT') && text.includes('inventory')) {
+-            return { rows: mockInventory };
++        } else if (text.includes('SELECT') && text.includes('logistics_summary')) {
++            return { rows: [mockLogistics] };
+         }
+         return { rows: [] };
+     }
+[diff_block_end]
+
+Please note that the above snippet only shows the MODIFIED lines from the last change. It shows up to 3 lines of unchanged lines before and after the modified lines. The actual file contents may have many more lines not shown.

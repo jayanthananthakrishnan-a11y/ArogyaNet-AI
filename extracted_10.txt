@@ -1,0 +1,108 @@
+Created At: 2026-07-08T13:27:49Z
+Completed At: 2026-07-08T13:27:49Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/db/pool.js`
+Total Lines: 238
+Total Bytes: 14131
+Showing lines 1 to 100
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import pg from 'pg';
+2: import dotenv from 'dotenv';
+3: dotenv.config();
+4: 
+5: const { Pool } = pg;
+6: 
+7: const pool = new Pool({
+8:   connectionString: process.env.DATABASE_URL,
+9: });
+10: 
+11: // Mock Facilities
+12: let mockFacilities = [
+13:     { id: 'PHC-NORTH', name: 'Primary Health Center (North)', type: 'PHC', location: 'Surya Nagar', total_beds: 50, critical_alerts: 1, footfall_avg: 450 },
+14:     { id: 'CHC-CENTRAL', name: 'Community Health Center (Central)', type: 'CHC', location: 'Kaveri District', total_beds: 150, critical_alerts: 0, footfall_avg: 1200 },
+15:     { id: 'PHC-EAST', name: 'Primary Health Center (East)', type: 'PHC', location: 'Indira Nagar', total_beds: 30, critical_alerts: 3, footfall_avg: 210 }
+16: ];
+17: 
+18: // Mock Users
+19: let mockUsers = [
+20:     { username: 'admin', password: 'password', role: 'admin', center_id: null },
+21:     { username: 'phc-north', password: 'password', role: 'staff', center_id: 'PHC-NORTH' },
+22:     { username: 'chc-central', password: 'password', role: 'staff', center_id: 'CHC-CENTRAL' },
+23:     { username: 'mla_user', password: 'password', role: 'mla', center_id: null }
+24: ];
+25: 
+26: // Multi-Tenant Mock Logistics
+27: let mockLogistics = {
+28:     'PHC-NORTH': {
+29:         consumables: [
+30:             { id: 1, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 400, unit: 'tablets', threshold: 500, expiry_date: '2027-01-01', ai_trend: 'Stable', batch_number: 'B-1001', supplier: 'PharmaCorp', storage_conditions: 'Room Temp' },
+31:             { id: 2, name: 'Amoxicillin 250mg', category: 'Medicine', quantity: 20, unit: 'tablets', threshold: 100, expiry_date: '2026-10-01', ai_trend: 'High Demand Expected', batch_number: 'B-1002', supplier: 'MedLife', storage_conditions: 'Room Temp' },
+32:             { id: 3, name: 'Surgical Masks', category: 'Hygiene', quantity: 50, unit: 'boxes', threshold: 200, expiry_date: '2028-05-12', ai_trend: 'Surging', batch_number: 'B-1003', supplier: 'HealthPlus', storage_conditions: 'Dry Place' }
+33:         ],
+34:         equipment: [
+35:             { id: 101, name: 'Ventilator V-200', status: 'Functional', last_serviced_date: '2026-05-10', type: 'Life Support' },
+36:             { id: 102, name: 'ECG Machine', status: 'Maintenance', last_serviced_date: '2025-11-20', type: 'Diagnostic' },
+37:             { id: 103, name: 'X-Ray Machine', status: 'Functional', last_serviced_date: '2026-01-15', type: 'Diagnostic' },
+38:             { id: 104, name: 'Blood Test Analyzer', status: 'Unavailable', last_serviced_date: '2025-08-01', type: 'Diagnostic' }
+39:         ],
+40:         transport: [
+41:             { id: 201, name: 'Ambulance A1 (ALS)', status: 'Available', fuel_level: '85%', driver_contact: '+91 9876543210' }
+42:         ],
+43:         beds: [
+44:             { id: 301, ward_type: 'General Ward', total_beds: 50, occupied_beds: 45 }
+45:         ]
+46:     },
+47:     'CHC-CENTRAL': {
+48:         consumables: [
+49:             { id: 4, name: 'Paracetamol 500mg', category: 'Medicine', quantity: 2000, unit: 'tablets', threshold: 1000, expiry_date: '2027-01-01', ai_trend: 'Stable', batch_number: 'B-2001', supplier: 'PharmaCorp', storage_conditions: 'Room Temp' }
+50:         ],
+51:         equipment: [
+52:             { id: 105, name: 'Blood Test Analyzer', status: 'Functional', last_serviced_date: '2026-03-10', type: 'Diagnostic' },
+53:             { id: 106, name: 'Ultrasound', status: 'Functional', last_serviced_date: '2026-04-12', type: 'Diagnostic' }
+54:         ],
+55:         transport: [],
+56:         beds: [
+57:             { id: 302, ward_type: 'ICU', total_beds: 30, occupied_beds: 28 }
+58:         ]
+59:     }
+60: };
+61: 
+62: // In-memory daily logs to simulate audit trail
+63: let mockDailyLogs = [
+64:     { id: 1, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'consumption', item_name: 'Paracetamol 500mg', quantity_used: 50 },
+65:     { id: 2, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 40000000).toISOString(), type: 'defect', item_name: 'ECG Machine', notes: 'Screen flickers when powered on.' },
+66:     { id: 3, center_id: 'PHC-EAST', timestamp: new Date(Date.now() - 86400000).toISOString(), type: 'disease', item_name: 'Dengue Cases', quantity_used: 45 },
+67:     { id: 4, center_id: 'PHC-NORTH', timestamp: new Date(Date.now() - 50000000).toISOString(), type: 'disease', item_name: 'Malaria Cases', quantity_used: 5 },
+68:     { id: 5, center_id: 'CHC-CENTRAL', timestamp: new Date(Date.now() - 20000000).toISOString(), type: 'disease', item_name: 'Viral Fever Cases', quantity_used: 120 }
+69: ];
+70: 
+71: // Module 7: Mock Attendance Logs
+72: let mockAttendance = [
+73:     { id: 1, center_id: 'PHC-NORTH', staff_name: 'Dr. Sharma', role: 'Doctor', status: 'Present', duty_hours: 8, leaves: 0, overtime: 2, department: 'General', patients_treated: 45, date: new Date().toISOString() },
+74:     { id: 2, center_id: 'PHC-NORTH', staff_name: 'Nurse Verma', role: 'Nurse', status: 'Absent', duty_hours: 0, leaves: 1, overtime: 0, department: 'Pediatrics', patients_treated: 0, date: new Date().toISOString() }
+75: ];
+76: 
+77: // Sanctioned Strength Configuration
+78: let mockSanctionedStrength = {
+79:     'PHC-NORTH': { 'Doctor': 5, 'Nurse': 10, 'Cleaner': 2 },
+80:     'CHC-CENTRAL': { 'Doctor': 15, 'Nurse': 30, 'Compounder': 5 }
+81: };
+82: 
+83: // Module 4: Specific Patient Footfall Logs
+84: let mockFootfallLogs = [
+85:     { id: 1, center_id: 'CHC-CENTRAL', date: new Date().toISOString(), patient_count: 300, event_name: 'Weekly Market', expected_attendance: 5000, disease_type: 'General' }
+86: ];
+87: 
+88: // Module 15: Command Center Alerts
+89: let mockCommandCenterAlerts = [
+90:     { id: 1, type: 'Disease Cluster', severity: 'High', description: 'Malaria outbreak in Indira Nagar', source_facility: 'PHC-EAST', broadcasted: false, broadcast_target: null, timestamp: new Date(Date.now() - 3600000).toISOString() },
+91:     { id: 2, type: 'Critical Shortage', severity: 'Elevated', description: 'Paracetamol stock critical', source_facility: 'PHC-NORTH', broadcasted: true, broadcast_target: 'Health Department', timestamp: new Date(Date.now() - 86400000).toISOString() }
+92: ];
+93: 
+94: // Module 5 & 6: Referrals
+95: let mockReferrals = [];
+96: 
+97: // Module 15: Direct Messaging Hub
+98: let mockMessages = [
+99:     { id: 1, sender_role: 'admin', sender_name: 'admin', content: 'Welcome to the Direct Channel.', timestamp: new Date(Date.now() - 86400000).toISOString() }
+100: ];
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

@@ -1,0 +1,101 @@
+Created At: 2026-07-07T18:17:36Z
+Completed At: 2026-07-07T18:17:37Z
+File Path: `file:///c:/Users/nithya/OneDrive/Desktop/Parliament_Hack2Skill/server/index.js`
+Total Lines: 93
+Total Bytes: 3251
+Showing lines 1 to 93
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import express from 'express';
+2: import cors from 'cors';
+3: import { VertexAI } from '@google-cloud/vertexai';
+4: import dotenv from 'dotenv';
+5: import path from 'path';
+6: import { fileURLToPath } from 'url';
+7: import { query } from './db/pool.js';
+8: 
+9: dotenv.config();
+10: 
+11: const __filename = fileURLToPath(import.meta.url);
+12: const __dirname = path.dirname(__filename);
+13: 
+14: const app = express();
+15: app.use(cors());
+16: app.use(express.json());
+17: 
+18: // --- SERVICE ACCOUNT AUTHENTICATION SETUP ---
+19: const keyPath = path.join(__dirname, 'service-account.json');
+20: process.env.GOOGLE_APPLICATION_CREDENTIALS = keyPath;
+21: 
+22: const projectId = process.env.GOOGLE_CLOUD_PROJECT || process.env.GCP_PROJECT || 'arogyanet-ai';
+23: const location = 'us-central1';
+24: 
+25: // 1. Dashboard Overview Endpoint (Fetches aggregated KPI data)
+26: app.get('/api/district/overview', async (req, res) => {
+27:   try {
+28:     const result = await query('-- dashboard_overview mock trigger');
+29:     res.json(result.rows[0]);
+30:   } catch (error) {
+31:     console.error(error);
+32:     res.status(500).json({ error: 'Failed to fetch dashboard data' });
+33:   }
+34: });
+35: 
+36: // 2. Autonomous AI Analysis Endpoint
+37: app.post('/api/analyze-center/:center_id', async (req, res) => {
+38:   const { center_id } = req.params;
+39:   
+40:   try {
+41:     // 1. Fetch live truth from Database
+42:     const inventoryResult = await query(`SELECT * FROM inventory WHERE center_id = $1`, [center_id]);
+43:     const inventoryData = inventoryResult.rows;
+44: 
+45:     const vertexAI = new VertexAI({ project: projectId, location: location });
+46:     const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+47: 
+48:     const prompt = `
+49:       You are an AI assistant for ArogyaNet, a District Health Command Center.
+50:       Analyze the following live database snapshot for a Primary Health Centre.
+51:       
+52:       Inventory Data: ${JSON.stringify(inventoryData)}
+53:       
+54:       Identify any potential shortages, expiries, or critical issues.
+55:       Provide the response strictly in the following JSON format:
+56:       {
+57:         "status": "Safe" | "Low" | "Critical",
+58:         "recommendation": "your recommendation here"
+59:       }
+60:     `;
+61: 
+62:     const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
+63:     const result = await generativeModel.generateContent(request);
+64:     
+65:     let text = '';
+66:     if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
+67:        text = result.response.candidates[0].content.parts[0].text;
+68:     }
+69:     
+70:     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+71:     const data = JSON.parse(cleanText);
+72: 
+73:     // If critical, autonomously insert an Alert into the database!
+74:     if (data.status === 'Critical') {
+75:        await query(
+76:            `INSERT INTO alerts (center_id, type, priority, message, recommended_action) 
+77:             VALUES ($1, $2, $3, $4, $5)`,
+78:            [center_id, 'AI Autonomous Alert', 'HIGH', 'Critical shortage predicted.', data.recommendation]
+79:        );
+80:     }
+81: 
+82:     res.json(data);
+83:   } catch (error) {
+84:     console.error('Vertex AI Error:', error);
+85:     res.status(500).json({ error: error.message || 'Internal server error.' });
+86:   }
+87: });
+88: 
+89: const PORT = process.env.PORT || 5000;
+90: app.listen(PORT, () => {
+91:   console.log(`Backend proxy server listening on port ${PORT}`);
+92: });
+93: 
+The above content shows the entire, complete file contents of the requested file.
