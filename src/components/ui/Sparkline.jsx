@@ -3,14 +3,17 @@ import React from 'react';
 const Sparkline = ({ data, color = '#06b6d4', className = '' }) => {
   if (!data || data.length === 0) return null;
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
+  const validData = data.filter(d => typeof d === 'number' && !isNaN(d));
+  if (!validData || validData.length === 0) return null;
+
+  const min = Math.min(...validData);
+  const max = Math.max(...validData);
   const range = max - min || 1;
   const width = 100;
   const height = 30;
 
-  const points = data.map((d, i) => {
-    const x = (i / (data.length - 1)) * width;
+  const points = validData.map((d, i) => {
+    const x = (i / (validData.length - 1 || 1)) * width;
     const y = height - ((d - min) / range) * height;
     return `${x},${y}`;
   }).join(' ');

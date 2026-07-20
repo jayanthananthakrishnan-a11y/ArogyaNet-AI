@@ -7,7 +7,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (username, password) => {
     try {
-        const res = await fetch('http://localhost:5000/api/login', {
+        const res = await fetch('/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -15,6 +15,7 @@ export const AuthProvider = ({ children }) => {
         const data = await res.json();
         
         if (data.success) {
+            sessionStorage.setItem('adminToken', data.token);
             setUser({
               role: data.user.role,
               center_id: data.user.center_id,
@@ -30,7 +31,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    sessionStorage.removeItem('adminToken');
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

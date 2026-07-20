@@ -6,8 +6,8 @@ import { useAuth } from '../AuthContext';
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('password');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async (e) => {
@@ -38,29 +38,7 @@ const LoginPage = () => {
         <form onSubmit={handleLogin} className="space-y-4 mt-8">
           {error && <div className="bg-rose-500/20 text-rose-400 border border-rose-500/50 p-3 rounded-lg text-sm text-center uppercase tracking-widest font-bold">{error}</div>}
           
-          <div className="flex flex-wrap gap-2 mb-6">
-              <button 
-                  type="button" 
-                  onClick={() => { setUsername('admin'); setPassword('password'); }}
-                  className={`flex-1 py-2 px-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg border transition-colors ${username === 'admin' ? 'bg-neon-cyan/20 text-neon-cyan border-neon-cyan/50' : 'bg-black/40 text-slate-400 border-white/10 hover:border-white/30'}`}
-              >
-                  Admin
-              </button>
-              <button 
-                  type="button" 
-                  onClick={() => { setUsername('phc-north'); setPassword('password'); }}
-                  className={`flex-1 py-2 px-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg border transition-colors ${username === 'phc-north' ? 'bg-neon-purple/20 text-neon-purple border-neon-purple/50' : 'bg-black/40 text-slate-400 border-white/10 hover:border-white/30'}`}
-              >
-                  Staff
-              </button>
-              <button 
-                  type="button" 
-                  onClick={() => { setUsername('mla_user'); setPassword('password'); }}
-                  className={`flex-1 py-2 px-2 text-[10px] sm:text-xs font-bold uppercase tracking-widest rounded-lg border transition-colors ${username === 'mla_user' ? 'bg-neon-teal/20 text-neon-teal border-neon-teal/50' : 'bg-black/40 text-slate-400 border-white/10 hover:border-white/30'}`}
-              >
-                  MLA/MP
-              </button>
-          </div>
+          {/* Removed demo login buttons for security */}
 
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Username</label>

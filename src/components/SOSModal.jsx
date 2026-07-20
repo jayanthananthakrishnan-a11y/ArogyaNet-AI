@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { ShieldAlert, Send, X, Loader2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import { useCitizenAuth } from '../CitizenAuthContext';
 import { useLanguage } from '../LanguageContext';
+import { Link } from 'react-router-dom';
 
 const SOSModal = ({ isOpen, onClose }) => {
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
   const { user } = useAuth();
+  const { citizenUser } = useCitizenAuth();
   const { language } = useLanguage();
 
   if (!isOpen) return null;
@@ -17,19 +21,41 @@ const SOSModal = ({ isOpen, onClose }) => {
 
     setLoading(true);
     try {
-      await fetch(`/api/sos`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          center_id: user?.center_id || 'UNKNOWN',
-          description,
-          language
-        })
-      });
-      setDescription('');
-      onClose();
+      if (citizenUser) {
+        // Public Citizen SOS
+        const token = sessionStorage.getItem('citizenToken');
+        const res = await fetch(`/api/public/sos`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ description, location: 'Unknown' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setMessage('Thank you for your report. The credibility of this message will be evaluated, and appropriate authorities will be notified.');
+            setTimeout(() => { setMessage(''); onClose(); }, 6000);
+        } else {
+            setMessage('Failed to submit SOS.');
+        }
+      } else if (user) {
+        // Command Center SOS
+        await fetch(`/api/sos`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            center_id: user?.center_id || 'UNKNOWN',
+            description,
+            language
+          })
+        });
+        setDescription('');
+        onClose();
+      }
     } catch (err) {
       console.error(err);
+      setMessage('Failed to submit SOS.');
     } finally {
       setLoading(false);
     }
@@ -54,10 +80,21 @@ const SOSModal = ({ isOpen, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          <div>
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
-              Describe the Emergency
-            </label>
+          {!user && !citizenUser ? (
+            <div className="text-center p-4 bg-slate-900 border border-white/10 rounded-xl">
+              <p className="text-slate-300 mb-4">Please log in to submit an Emergency SOS.</p>
+              <Link to="/signin" onClick={onClose} className="inline-block px-6 py-2 bg-neon-cyan text-slate-900 font-bold rounded-xl">Citizen Login</Link>
+            </div>
+          ) : message ? (
+            <div className="text-center p-4 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl">
+              {message}
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                  Describe the Emergency
+                </label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -76,13 +113,15 @@ const SOSModal = ({ isOpen, onClose }) => {
               Cancel
             </button>
             <button 
-              type="submit" 
+              type="submit"
               disabled={loading}
-              className="flex-1 py-3 px-4 bg-rose-600 text-white rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-rose-500 transition-colors flex justify-center items-center gap-2 shadow-[0_0_20px_rgba(244,63,94,0.4)] disabled:opacity-50"
+              className="flex-[2] py-3 px-4 bg-rose-500 hover:bg-rose-400 text-black rounded-xl font-black uppercase tracking-widest text-sm transition-all shadow-[0_0_20px_rgba(244,63,94,0.4)] hover:shadow-[0_0_30px_rgba(244,63,94,0.6)] flex items-center justify-center gap-2"
             >
-              {loading ? <Loader2 size={18} className="animate-spin" /> : <><Send size={18} /> Broadcast SOS</>}
+              {loading ? <Loader2 className="animate-spin" size={18}/> : <><Send size={18} /> Transmit SOS</>}
             </button>
           </div>
+          </>
+          )}
         </form>
       </div>
     </div>

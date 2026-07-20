@@ -31,13 +31,13 @@ CREATE TABLE users (
     username VARCHAR(100) PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL,
-    center_id VARCHAR(50) REFERENCES facilities(id)
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE
 );
 
 -- 3. Logistics (Inventory)
 CREATE TABLE logistics (
     id SERIAL PRIMARY KEY,
-    center_id VARCHAR(50) REFERENCES facilities(id),
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     category VARCHAR(50) NOT NULL,
     itemPayload JSONB NOT NULL
 );
@@ -45,7 +45,7 @@ CREATE TABLE logistics (
 -- 4. Daily Logs
 CREATE TABLE daily_logs (
     id SERIAL PRIMARY KEY,
-    center_id VARCHAR(50) REFERENCES facilities(id),
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     type VARCHAR(50) NOT NULL,
     item_name VARCHAR(255),
@@ -55,7 +55,7 @@ CREATE TABLE daily_logs (
 -- 5. Attendance
 CREATE TABLE attendance (
     id SERIAL PRIMARY KEY,
-    center_id VARCHAR(50) REFERENCES facilities(id),
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     staff_name VARCHAR(255) NOT NULL,
     role VARCHAR(100) NOT NULL,
     status VARCHAR(50) NOT NULL,
@@ -67,15 +67,18 @@ CREATE TABLE attendance (
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- 6. Sanctioned Strength (Uses JSONB to perfectly mimic the nested structure required by the frontend/AI)
+-- 6. Sanctioned Strength 
 CREATE TABLE sanctioned_strength (
-    data JSONB NOT NULL
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
+    role VARCHAR(100) NOT NULL,
+    count INTEGER NOT NULL,
+    PRIMARY KEY (center_id, role)
 );
 
 -- 7. Footfall Logs
 CREATE TABLE footfall_logs (
     id SERIAL PRIMARY KEY,
-    center_id VARCHAR(50) REFERENCES facilities(id),
+    center_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     patient_count INTEGER,
     event_name VARCHAR(255),
@@ -90,7 +93,7 @@ CREATE TABLE command_center_alerts (
     type VARCHAR(100),
     severity VARCHAR(50),
     description TEXT,
-    source_facility VARCHAR(50) REFERENCES facilities(id),
+    source_facility VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     broadcasted BOOLEAN DEFAULT FALSE,
     broadcast_target VARCHAR(100),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -108,8 +111,8 @@ CREATE TABLE messages (
 -- 10. Referrals
 CREATE TABLE referrals (
     id SERIAL PRIMARY KEY,
-    phc_id VARCHAR(50) REFERENCES facilities(id),
-    chc_id VARCHAR(50) REFERENCES facilities(id),
+    phc_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
+    chc_id VARCHAR(50) REFERENCES facilities(id) ON DELETE CASCADE,
     patient_name VARCHAR(255),
     condition_desc TEXT,
     status VARCHAR(50) DEFAULT 'Pending',
@@ -158,7 +161,9 @@ SELECT
 INSERT INTO facilities (id, name, type, location, total_beds, critical_alerts, footfall_avg) VALUES
 ('PHC-NORTH', 'Primary Health Center (North)', 'PHC', 'Surya Nagar', 50, 1, 450),
 ('CHC-CENTRAL', 'Community Health Center (Central)', 'CHC', 'Kaveri District', 150, 0, 1200),
-('PHC-EAST', 'Primary Health Center (East)', 'PHC', 'Indira Nagar', 30, 3, 210);
+('PHC-EAST', 'Primary Health Center (East)', 'PHC', 'Indira Nagar', 30, 3, 210),
+('PHC-WEST', 'Primary Health Center (West)', 'PHC', 'Surya Nagra', 45, 0, 320),
+('PHC-SOUTH', 'Primary Health Center (South)', 'PHC', 'Outskirts', 60, 1, 410);
 
 INSERT INTO users (username, password, role, center_id) VALUES
 ('admin', 'password', 'admin', NULL),
@@ -179,6 +184,11 @@ INSERT INTO logistics (center_id, category, itemPayload) VALUES
 ('CHC-CENTRAL', 'consumables', '{"name": "Paracetamol 500mg", "category": "Medicine", "quantity": 2000, "unit": "tablets", "threshold": 1000, "expiry_date": "2027-01-01", "ai_trend": "Stable", "batch_number": "B-2001", "supplier": "PharmaCorp", "storage_conditions": "Room Temp"}'),
 ('CHC-CENTRAL', 'equipment', '{"name": "Blood Test Analyzer", "status": "Functional", "last_serviced_date": "2026-03-10", "type": "Diagnostic"}'),
 ('CHC-CENTRAL', 'equipment', '{"name": "Ultrasound", "status": "Functional", "last_serviced_date": "2026-04-12", "type": "Diagnostic"}'),
+('CHC-CENTRAL', 'transport', '{"name": "Ambulance B2 (BLS)", "status": "In-Transit", "fuel_level": "60%", "driver_contact": "+91 9876543211"}'),
+('PHC-EAST', 'transport', '{"name": "Ambulance C3 (ALS)", "status": "Out of Service", "fuel_level": "10%", "driver_contact": "+91 9876543212"}'),
+('PHC-NORTH', 'transport', '{"name": "Ambulance A2 (BLS)", "status": "Available", "fuel_level": "95%", "driver_contact": "+91 9876543213"}'),
+('PHC-WEST', 'transport', '{"name": "Ambulance W1 (BLS)", "status": "Available", "fuel_level": "80%", "driver_contact": "+91 9876543214"}'),
+('PHC-SOUTH', 'transport', '{"name": "Ambulance S1 (ALS)", "status": "In-Transit", "fuel_level": "40%", "driver_contact": "+91 9876543215"}'),
 ('CHC-CENTRAL', 'beds', '{"ward_type": "ICU", "total_beds": 30, "occupied_beds": 28}');
 
 INSERT INTO daily_logs (center_id, timestamp, type, item_name, qty_or_notes) VALUES
@@ -192,11 +202,13 @@ INSERT INTO attendance (center_id, staff_name, role, status, duty_hours, leaves,
 ('PHC-NORTH', 'Dr. Sharma', 'Doctor', 'Present', 8, 0, 2, 'General', 45),
 ('PHC-NORTH', 'Nurse Verma', 'Nurse', 'Absent', 0, 1, 0, 'Pediatrics', 0);
 
-INSERT INTO sanctioned_strength (data) VALUES
-('{
-    "PHC-NORTH": { "Doctor": 5, "Nurse": 10, "Cleaner": 2 },
-    "CHC-CENTRAL": { "Doctor": 15, "Nurse": 30, "Compounder": 5 }
-}'::jsonb);
+INSERT INTO sanctioned_strength (center_id, role, count) VALUES
+('PHC-NORTH', 'Doctor', 5),
+('PHC-NORTH', 'Nurse', 10),
+('PHC-NORTH', 'Cleaner', 2),
+('CHC-CENTRAL', 'Doctor', 15),
+('CHC-CENTRAL', 'Nurse', 30),
+('CHC-CENTRAL', 'Compounder', 5);
 
 INSERT INTO footfall_logs (center_id, patient_count, event_name, expected_attendance, disease_type) VALUES
 ('CHC-CENTRAL', 300, 'Weekly Market', 5000, 'General');

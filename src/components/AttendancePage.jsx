@@ -13,13 +13,22 @@ const AttendancePage = () => {
     // Admin Strength State
     const [strengthData, setStrengthData] = useState({});
     const [facilities, setFacilities] = useState([]);
+    const [registeredUsers, setRegisteredUsers] = useState([]);
+
+    const [activeCenter, setActiveCenter] = useState(user?.center_id || 'PHC-NORTH');
 
     const fetchLogs = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/attendance/${user?.center_id || 'PHC-NORTH'}`);
+            const res = await fetch(`/api/attendance/${activeCenter}`);
             const data = await res.json();
-            setLogs(data);
+            setLogs(Array.isArray(data) ? data : []);
+
+            const uRes = await fetch(`/api/users`);
+            const uData = await uRes.json();
+            if (Array.isArray(uData)) {
+                setRegisteredUsers(uData.filter(u => u.center_id === activeCenter));
+            }
 
             if (isAdmin) {
                 const facRes = await fetch(`/api/district/surveillance`); // Borrow facilities list
@@ -36,13 +45,13 @@ const AttendancePage = () => {
 
     useEffect(() => {
         fetchLogs();
-    }, [user]);
+    }, [activeCenter, user]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = e.target;
         const payload = {
-            center_id: user?.center_id,
+            center_id: activeCenter,
             staff_name: form.staff_name.value,
             role: form.role.value,
             status: form.status.value,
@@ -113,7 +122,22 @@ const AttendancePage = () => {
             )}
 
             {activeTab === 'roster' ? (
-                <div className={`grid grid-cols-1 ${!isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-6`}>
+                <div className="space-y-4">
+                    {isAdmin && facilities.length > 0 && (
+                        <div className="flex items-center gap-4 bg-black/40 border border-white/10 p-4 rounded-lg">
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest">Select Facility:</label>
+                            <select 
+                                value={activeCenter} 
+                                onChange={(e) => setActiveCenter(e.target.value)}
+                                className="bg-black/60 border border-white/20 rounded-lg px-4 py-2 text-sm font-bold text-white outline-none focus:border-neon-cyan cursor-pointer"
+                            >
+                                {facilities.map(fac => (
+                                    <option key={fac.id} value={fac.id}>{fac.id} - {fac.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    <div className={`grid grid-cols-1 ${!isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-1'} gap-6`}>
                     {/* Input Form (Staff Only) */}
                     {!isAdmin && (
                         <GlowCard accent="cyan" className="p-6">
@@ -126,7 +150,13 @@ const AttendancePage = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Staff Name</label>
-                                        <input name="staff_name" type="text" required className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-neon-cyan transition-colors" placeholder="e.g. Dr. Smith" />
+                                        <select name="staff_name" required className="w-full bg-black/40 border border-white/10 rounded-lg p-3 text-sm text-white focus:outline-none focus:border-neon-cyan transition-colors appearance-none cursor-pointer">
+                                            <option value="">Select Registered Staff...</option>
+                                            {registeredUsers.map(u => (
+                                                <option key={u.username} value={u.username}>{u.username} ({u.role})</option>
+                                            ))}
+                                            {registeredUsers.length === 0 && <option value="" disabled>No staff registered in this center</option>}
+                                        </select>
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Role</label>
@@ -233,6 +263,7 @@ const AttendancePage = () => {
                             )}
                         </div>
                     </GlowCard>
+                </div>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,15 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Cpu, Send, X, Loader2, Bot, User } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import { useCitizenAuth } from '../CitizenAuthContext';
 import { useLanguage } from '../LanguageContext';
+import { Link } from 'react-router-dom';
 
 const ChatbotModal = ({ isOpen, onClose }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([
-    { role: 'assistant', text: 'Hello! I am the ArogyaNet AI Assistant. How can I help you manage your district logistics, alerts, or patient data today?' }
+    { role: 'assistant', text: 'Hello! I am the ArogyaNet AI Assistant. How can I help you today?' }
   ]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { citizenUser } = useCitizenAuth();
   const { language } = useLanguage();
   const messagesEndRef = useRef(null);
 
@@ -23,28 +26,48 @@ const ChatbotModal = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  const handleSend = async (e) => {
+  const handleSend = async (e, textOverride = null) => {
     if (e) e.preventDefault();
-    if (!input.trim()) return;
+    const userMessage = textOverride || input.trim();
+    if (!userMessage) return;
 
-    const userMessage = input.trim();
     setMessages(prev => [...prev, { role: 'user', text: userMessage }]);
-    setInput('');
+    if (!textOverride) setInput('');
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/chatbot`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          query: userMessage,
-          role: user?.role,
-          center_id: user?.center_id,
-          language
-        })
-      });
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: 'assistant', text: data.reply }]);
+      if (citizenUser) {
+        const token = sessionStorage.getItem('citizenToken');
+        const res = await fetch(`/api/public/chat`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ message: userMessage })
+        });
+        const data = await res.json();
+        if (data.success) {
+            setMessages(prev => [...prev, { role: 'assistant', text: data.reply }]);
+        } else {
+            setMessages(prev => [...prev, { role: 'assistant', text: data.error || 'Sorry, an error occurred.' }]);
+        }
+      } else if (user) {
+        const res = await fetch(`/api/chatbot`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            query: userMessage,
+            role: user?.role,
+            center_id: user?.center_id,
+            language
+          })
+        });
+        const data = await res.json();
+        setMessages(prev => [...prev, { role: 'assistant', text: data.reply }]);
+      } else {
+        setMessages(prev => [...prev, { role: 'assistant', text: 'Please log in to use the AI Assistant.' }]);
+      }
     } catch (err) {
       console.error(err);
       setMessages(prev => [...prev, { role: 'assistant', text: 'Sorry, I encountered an error connecting to the intelligence core.' }]);
@@ -54,9 +77,9 @@ const ChatbotModal = ({ isOpen, onClose }) => {
   };
 
   const quickActions = [
-    "Check Paracetamol Stock",
-    "Show Critical Alerts",
-    "Generate Daily Report"
+    "What is ArogyaNet AI?",
+    "How to navigate the portal?",
+    "Where can I find national data?"
   ];
 
   return (
@@ -108,7 +131,7 @@ const ChatbotModal = ({ isOpen, onClose }) => {
           {quickActions.map((action, idx) => (
             <button 
               key={idx}
-              onClick={() => { setInput(action); }}
+              onClick={() => { handleSend(null, action); }}
               className="shrink-0 text-[10px] uppercase tracking-widest font-bold bg-white/5 border border-white/10 hover:border-neon-cyan/50 hover:text-neon-cyan text-slate-400 px-3 py-1.5 rounded-full transition-colors"
             >
               {action}

@@ -1,93 +1,93 @@
-# ArogyaNet AI: Proactive District Health Intelligence
+# ArogyaNet AI
 
-## Executive Summary
-Healthcare management at the district level is often hindered by fragmented data, manual resource tracking, and delayed responses to emerging health crises. **ArogyaNet AI** is a comprehensive, centralized District Health Command Center solution that replaces reactive administrative hurdles with **proactive, AI-driven predictive health operations**. By aggregating real-time footfall, logistics, and disease surveillance data across Primary Health Centers (PHCs) and Community Health Centers (CHCs), ArogyaNet AI empowers administrators and healthcare staff to predict shortages, route ambulances dynamically, and neutralize localized outbreaks before they escalate.
+ArogyaNet AI is a comprehensive, AI-powered healthcare intelligence platform for India. It bridges the gap between massive national datasets and actionable intelligence, offering a robust **Public Portal** for citizens alongside a secure, multi-tenant **Command Center** for administrators, health staff, and government officials.
 
-## Key Technical Features
-* **AI-Driven Bed Allocation & Logistics:** Real-time visibility into bed capacities, medical equipment statuses, and consumable stock, augmented by AI to forecast demand based on regional patient trends.
-* **Predictive Procurement:** Intelligent AI scanning of daily health logs and disease reports to automatically identify critical shortages and recommend immediate procurements.
-* **Redistribution Engine:** Autonomous generation of cross-facility redistribution manifests, optimizing resource usage (e.g., transferring surplus medicines from a CHC to a critically depleted PHC).
-* **Role-Based Access Control (RBAC):** Tailored dashboards and functionality specifically designed for District Administrators, PHC/CHC Staff Officers, and Government Observers (MP/MLA).
-* **Disease Surveillance & Alerts:** Granular patient footfall tracking combined with automated Command Center Alerts that instantly notify administrators of potential disease clusters and medical emergencies.
+## Architecture
 
-## Tech Stack
-* **Frontend:** React, Vite, Tailwind CSS, Lucide React (for iconography)
-* **Backend:** Node.js, Express.js
-* **Database:** PostgreSQL (with complex JSONB aggregations)
-* **AI Integration:** Google Vertex AI (Gemini 2.5 Flash) for data synthesis, forecasting, and NLP analysis
+1. **Government Datasets**: Raw healthcare data representing national infrastructure, demographics, and operations.
+2. **ETL Pipeline**: Extracts, transforms, and securely loads the health data.
+3. **PostgreSQL Database**: The central data warehouse that robustly stores relational tables for both public datasets and application logic.
+4. **Express Backend APIs**: Provides scalable RESTful endpoints, applying role-based access control and token-based authentication.
+5. **React Frontend**: A highly responsive, modern UI powered by Vite, Tailwind CSS, Framer Motion, and React Router.
+6. **Citizen Portal + Command Center**: The dual-facing application layer separating public access from secure operations.
 
-## Project Architecture
-ArogyaNet AI operates on a robust microservices-inspired architecture. The React frontend interfaces with a Node.js API that directly connects to a PostgreSQL database serving as the single source of truth. The application heavily leverages **Google Vertex AI**—the AI Assistant operates as a localized intelligence layer, ingesting aggregated JSON snapshots of real-time database views (like `logistics_summary` and `daily_logs`). The AI processes this structured data instantly to return JSON-formatted insights, governance recommendations, and real-time alerts that are seamlessly rendered back into the user interface.
+## Features
 
-## Deployment & Setup Instructions
+### Public Portal (Citizen Facing)
+- **National Health Intelligence**: Data visualizations for overall national health performance.
+- **State Insights**: Drill-down analytics and trend mapping per state.
+- **District Explorer**: Real-time lookup of infrastructure specific to granular district localities.
+- **Citizen AI Assistant**: An integrated Google Vertex AI / Gemini powered assistant helping users navigate public health resources.
+- **Emergency SOS**: Rapid emergency reporting functionality.
+- **Contact System**: An integrated email dispatching contact form.
 
-### Prerequisites
-* Node.js (v18+)
-* PostgreSQL installed and running locally
+### Command Center (Internal Operations)
+- **Admin Dashboard**: Absolute oversight, registry management, and system-wide configurations.
+- **Staff Dashboard**: Local operational tooling for inventory, surveillance, and daily patient logging.
+- **MLA/Government View**: Higher-level strategic governance recommendations and predictive footfall insights.
+- **Logistics & Alerts**: Real-time resource redistribution requests and predictive alerts.
 
-### 1. Clone the Repository
-```bash
-git clone <your-repository-url>
-cd ArogyaNet-AI
-```
+---
 
-### 2. Install Dependencies
-Install both the frontend and backend dependencies:
-```bash
-npm install
-cd server
-npm install
-cd ..
-```
+## Setup Instructions
 
-### 3. Configure PostgreSQL Database
-1. Create a local PostgreSQL database named `arogyanet`.
-2. Locate the database schema file at `server/db/schema.sql`.
-3. Execute the schema file against your `arogyanet` database to create all tables and views, and to inject the seed data.
-```bash
-psql -U postgres -d arogyanet -f server/db/schema.sql
-```
+### 1. Database Setup
+ArogyaNet uses PostgreSQL. 
+1. Create a local PostgreSQL database.
+2. Import the schemas and tables (found in the root/database directory or backup scripts).
+3. Update your `.env` connection string.
 
-### 4. Configure Environment Variables
-Create a `.env` file in the `server` directory and configure the following:
+### 2. Environment Variables
+Create a `.env` file in the root of the project (copy from `.env.example`).
 ```env
-# Database Credentials
-DB_USER=postgres
-DB_PASSWORD=postgresql
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=arogyanet
+# Database
+DATABASE_URL=postgresql://user:password@localhost:5432/arogyanet
 
-# Google Cloud Platform (Gemini Vertex AI)
-GCP_PROJECT=your-gcp-project-id
-GOOGLE_APPLICATION_CREDENTIALS=./service-account.json
+# Authentication
+JWT_SECRET=your_admin_secret
+CITIZEN_JWT_SECRET=your_citizen_secret
+
+# AI
+GEMINI_API_KEY=your_api_key
+
+# Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your_email@gmail.com
+SMTP_PASSWORD=your_app_password
 ```
-*Note: Ensure your GCP Service Account JSON key is placed in the `server` directory and named `service-account.json`.*
 
-### 5. Run the Application
-You will need to run the backend and frontend concurrently in two separate terminals.
-
-**Terminal 1 (Backend Server):**
+### 3. Backend Setup
+The backend runs on Express/Node.js.
 ```bash
 cd server
+npm install
 node index.js
 ```
+The server defaults to port `5000`.
 
-**Terminal 2 (Frontend Client):**
+### 4. Frontend Setup
+The frontend runs on React + Vite.
 ```bash
+# In the root directory
+npm install
 npm run dev
 ```
-Navigate to `http://localhost:5173` in your browser.
 
-## Testing Credentials
-The database comes pre-seeded with the following accounts for immediate testing by hackathon judges:
+---
 
-* **District Administrator (Full Access):**
-  * Username: `admin`
-  * Password: `password`
-* **PHC Staff (Facility Specific Access):**
-  * Username: `phc-north`
-  * Password: `password`
-* **Government Observer (Read-Only AI Insights):**
-  * Username: `mla_user`
-  * Password: `password`
+## Demo Credentials
+
+> **IMPORTANT**: The following credentials are provided strictly for demonstration and hackathon testing purposes. They should NEVER be used in a production environment. Please rotate or delete these accounts before deploying live.
+
+**District Administrator**
+- Username: `admin`
+- Password: `password`
+
+**PHC Staff**
+- Username: `phc-north`
+- Password: `password`
+
+**Government Observer (MLA)**
+- Username: `mla_user`
+- Password: `password`
