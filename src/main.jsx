@@ -8,6 +8,11 @@ window.fetch = async (...args) => {
     let [resource, config] = args;
     config = config || {};
     
+    const API_BASE_URL = "https://arogyanet-ai.onrender.com";
+    if (typeof resource === 'string' && resource.startsWith('/api/')) {
+        resource = `${API_BASE_URL}${resource}`;
+    }
+    
     const adminToken = sessionStorage.getItem('adminToken');
     
     // Check if the resource is a Command Center API
