@@ -1,6 +1,6 @@
 import express from 'express';
 import cors from 'cors';
-import { VertexAI } from '@google-cloud/vertexai';
+import { GoogleGenAI } from "@google/genai";
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -215,8 +215,8 @@ app.get('/api/district/ai-report', async (req, res) => {
         const logsResult = await query(`SELECT * FROM daily_logs ORDER BY timestamp DESC LIMIT 50`);
         const logs = logsResult.rows;
 
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
 
         const prompt = `
           You are an AI acting as the District Health Commander.
@@ -234,12 +234,11 @@ app.get('/api/district/ai-report', async (req, res) => {
           }
         `;
 
-        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
-        const result = await generativeModel.generateContent(request);
+        const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
         
         let text = '';
-        if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
-           text = result.response.candidates[0].content.parts[0].text;
+        if (result.text) {
+           text = result.text;
         }
         
         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -270,8 +269,8 @@ app.get('/api/district/formal-report', async (req, res) => {
         const dailyLogs = logRes.rows;
         const allLogistics = invRes.rows[0];
 
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
 
         const prompt = `
           You are the Chief Medical AI Officer for the ArogyaNet District Health System.
@@ -304,12 +303,11 @@ app.get('/api/district/formal-report', async (req, res) => {
           }
         `;
 
-        const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
-        const result = await generativeModel.generateContent(request);
+        const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
         
         let text = '';
-        if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
-           text = result.response.candidates[0].content.parts[0].text;
+        if (result.text) {
+           text = result.text;
         }
         
         const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
@@ -616,8 +614,8 @@ app.post('/api/analyze-center/:center_id', async (req, res) => {
     const inventoryResult = await query(`SELECT * FROM inventory WHERE center_id = $1`, [center_id]);
     const inventoryData = inventoryResult.rows;
 
-    const vertexAI = new VertexAI({ project: projectId, location: location });
-    const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+    
 
     const prompt = `
       You are an AI assistant for ArogyaNet, a District Health Command Center.
@@ -633,13 +631,12 @@ app.post('/api/analyze-center/:center_id', async (req, res) => {
       }
     `;
 
-    const request = { contents: [{ role: 'user', parts: [{ text: prompt }] }] };
-    const result = await generativeModel.generateContent(request);
+    const result = await ai.models.generateContent({ model: "gemini-2.5-flash", contents: prompt });
     
     let text = '';
-    if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
-       text = result.response.candidates[0].content.parts[0].text;
-    }
+    if (result.text) {
+           text = result.text;
+        }
     
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const data = JSON.parse(cleanText);
@@ -699,8 +696,8 @@ app.delete('/api/messages/:id', async (req, res) => {
 app.post('/api/chatbot', async (req, res) => {
     const { query: userQuery, role, center_id, language } = req.body;
     try {
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         
         const prompt = `
           You are the ArogyaNet District Intelligence Core, an AI assistant for a local health administration system.
@@ -716,9 +713,9 @@ app.post('/api/chatbot', async (req, res) => {
         let text = '';
         try {
             const result = await generativeModel.generateContent(request);
-            if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
-               text = result.response.candidates[0].content.parts[0].text;
-            }
+            if (result.text) {
+           text = result.text;
+        }
         } catch (apiErr) {
             console.log("Vertex AI failed in chatbot, falling back to mock response.");
             const queryLower = userQuery.toLowerCase();
@@ -746,8 +743,8 @@ app.post('/api/district/redistribution', async (req, res) => {
         const facRes = await query('SELECT * FROM facilities');
         const facilities = facRes.rows;
         
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         
         const prompt = `
           Analyze the following district facilities:
@@ -769,9 +766,9 @@ app.post('/api/district/redistribution', async (req, res) => {
         try {
             const result = await generativeModel.generateContent(request);
             let text = '';
-            if (result.response && result.response.candidates && result.response.candidates[0].content.parts[0]) {
-               text = result.response.candidates[0].content.parts[0].text;
-            }
+            if (result.text) {
+           text = result.text;
+        }
             
             const cleanText = text.replace(/\`\`\`json/g, '').replace(/\`\`\`/g, '').trim();
             data = JSON.parse(cleanText);
@@ -793,8 +790,8 @@ app.post('/api/district/redistribution', async (req, res) => {
 app.get('/api/mla/trend-analytics', async (req, res) => {
     const { lang } = req.query;
     try {
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         const logsRes = await query('SELECT * FROM daily_logs');
         
         const prompt = `
@@ -821,8 +818,8 @@ app.get('/api/mla/trend-analytics', async (req, res) => {
 app.get('/api/mla/governance-recommendations', async (req, res) => {
     const { lang } = req.query;
     try {
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const generativeModel = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         const facRes = await query('SELECT * FROM facilities');
         
         const prompt = `
@@ -965,7 +962,9 @@ const CITIZEN_JWT_SECRET = process.env.CITIZEN_JWT_SECRET || 'fallback_citizen_s
 // Setup Nodemailer (Real SMTP with fallback)
 const transporter = nodemailer.createTransport(
   process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? {
-    service: 'gmail',
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.GMAIL_USER,
       pass: process.env.GMAIL_APP_PASSWORD
@@ -1069,8 +1068,8 @@ app.post('/api/public/chat', verifyCitizen, async (req, res) => {
         }
         
         // Call Vertex AI using the same configuration as the Admin portal
-        const vertexAI = new VertexAI({ project: projectId, location: location });
-        const model = vertexAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+        
         
         const systemPrompt = "You are ArogyaNet AI, a public healthcare assistant for India. Help citizens find information like blood banks, PHCs, or general health guidelines. Keep it concise and helpful.";
         
@@ -1145,6 +1144,9 @@ app.delete('/api/public/profile', verifyCitizen, async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to delete account' });
     }
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Backend proxy server listening on port ${PORT}`);
