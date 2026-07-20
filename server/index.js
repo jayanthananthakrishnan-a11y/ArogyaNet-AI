@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import { query } from './db/pool.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
+import { Resend } from "resend";
 
 
 dotenv.config();
@@ -959,20 +959,8 @@ const PORT = process.env.PORT || 5000;
 
 const CITIZEN_JWT_SECRET = process.env.CITIZEN_JWT_SECRET || 'fallback_citizen_secret';
 
-// Setup Nodemailer (Real SMTP with fallback)
-const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 587,
-    secure: false,
-    family: 4,
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-});
+// Setup Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 app.post('/api/public/signup', async (req, res) => {
     const { name, email, phone, password } = req.body;
@@ -1098,12 +1086,11 @@ app.post('/api/public/sos', async (req, res) => {
 app.post('/api/public/contact', async (req, res) => {
     const { name, email, phone, subject, message } = req.body;
     try {
-        const mailOptions = {
-            from: process.env.GMAIL_USER,
-            to: process.env.GMAIL_USER,
+        const { data, error } = await resend.emails.send({
+            from: "onboarding@resend.dev",
+            to: "jayanthchess1705@gmail.com",
             replyTo: email,
             subject: `Contact Form: ${subject}`,
-            text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`,
             html: `<h3>New Contact Form Submission</h3>
                    <p><strong>Name:</strong> ${name}</p>
                    <p><strong>Email:</strong> ${email}</p>
@@ -1111,10 +1098,14 @@ app.post('/api/public/contact', async (req, res) => {
                    <p><strong>Subject:</strong> ${subject}</p>
                    <hr/>
                    <p>${message.replace(/\n/g, '<br/>')}</p>`
-        };
+        });
 
-        const info = await transporter.sendMail(mailOptions);
-        console.log('Message sent: %s', info.messageId || 'mock stream');
+        if (error) {
+            console.error('Resend error:', error);
+            return res.status(500).json({ success: false, error: 'Failed to send message.' });
+        }
+
+        console.log('Message sent via Resend:', data);
         res.json({ success: true, message: 'Message sent successfully.' });
     } catch (err) {
         console.error('Contact error:', err);
