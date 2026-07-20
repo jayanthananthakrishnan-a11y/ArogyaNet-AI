@@ -960,21 +960,18 @@ const PORT = process.env.PORT || 5000;
 const CITIZEN_JWT_SECRET = process.env.CITIZEN_JWT_SECRET || 'fallback_citizen_secret';
 
 // Setup Nodemailer (Real SMTP with fallback)
-const transporter = nodemailer.createTransport(
-  process.env.GMAIL_USER && process.env.GMAIL_APP_PASSWORD ? {
+const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
     secure: false,
     auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD
+    },
+    tls: {
+        rejectUnauthorized: false
     }
-  } : {
-    streamTransport: true,
-    newline: 'windows',
-    logger: true
-  }
-);
+});
 
 app.post('/api/public/signup', async (req, res) => {
     const { name, email, phone, password } = req.body;
@@ -1101,8 +1098,8 @@ app.post('/api/public/contact', async (req, res) => {
     const { name, email, phone, subject, message } = req.body;
     try {
         const mailOptions = {
-            from: process.env.GMAIL_USER || '"ArogyaNet System" <no-reply@arogyanet.ai>',
-            to: 'jayanthchess1705@gmail.com', // Sending to founder
+            from: process.env.GMAIL_USER,
+            to: process.env.GMAIL_USER,
             replyTo: email,
             subject: `Contact Form: ${subject}`,
             text: `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\n\nMessage:\n${message}`,
