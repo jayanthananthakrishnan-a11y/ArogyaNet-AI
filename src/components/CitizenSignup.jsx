@@ -11,7 +11,7 @@ const CitizenSignup = () => {
     const { loginCitizen } = useCitizenAuth();
     const navigate = useNavigate();
 
-    const emailRegex = /^[a-zA-Z0-0._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /^(\+91)?[6-9]\d{9}$/;
 
     const handleSubmit = async (e) => {
